@@ -1,8 +1,14 @@
 # Dependencies
 node_modules/
 
-# Local data, browser profiles, credentials & logs
+# Local data, browser profiles, credentials, stray scratch HTMLs & logs
 data/
+/.html
+/.html1.html
+/Untitled-1.HTML
+/hellogametes.html
+/download
+/download (*)
 *.log
 .vercel
 .gemini/

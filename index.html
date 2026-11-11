@@ -1243,7 +1243,8 @@ async function readSSE(res,onData,signal){
 }
 async function errOf(res){let t='';try{t=await res.text();const j=JSON.parse(t);t=j.error?.message||j.error||t}catch{}return `HTTP ${res.status}: ${String(t).slice(0,300)}`}
 async function callModel(id,prompt,onTok,signal){
-  if (window.vaultPromise && (!S.vaultAvailable || !S.vaultAvailable.length)) {
+  const hasServerApi = location.protocol.startsWith('http') && !location.hostname.endsWith('github.io');
+  if (hasServerApi && window.vaultPromise && (!S.vaultAvailable || !S.vaultAvailable.length)) {
     try { await window.vaultPromise; } catch (_) {}
   }
 
@@ -1251,7 +1252,7 @@ async function callModel(id,prompt,onTok,signal){
   if (id === 'openai') {
     const oaiKey = key('openai');
     const preferApi = !!(oaiKey && S.routes && S.routes.openai === 'api');
-    if (!preferApi && location.protocol.startsWith('http')) {
+    if (!preferApi && hasServerApi) {
       let textContent = (typeof prompt === 'object' && prompt.text !== undefined) ? prompt.text : String(prompt || '');
       const atts = (typeof prompt === 'object' && prompt.attachments) ? prompt.attachments : [];
       if (atts.length) {
@@ -1320,7 +1321,7 @@ async function callModel(id,prompt,onTok,signal){
   if (['gemini', 'perplexity', 'deepseek'].includes(id)) {
     const customKey = key(id);
     const preferApi = !!(customKey && S.routes && S.routes[id] === 'api');
-    if (!preferApi && location.protocol.startsWith('http')) {
+    if (!preferApi && hasServerApi) {
       let textContent = (typeof prompt === 'object' && prompt.text !== undefined) ? prompt.text : String(prompt || '');
       const atts = (typeof prompt === 'object' && prompt.attachments) ? prompt.attachments : [];
       if (atts.length) {
@@ -1384,7 +1385,7 @@ async function callModel(id,prompt,onTok,signal){
   if (id === 'anthropic') {
     const antKey = key('anthropic');
     const preferApi = !!(antKey && S.routes && S.routes.anthropic === 'api');
-    if (!preferApi && location.protocol.startsWith('http')) {
+    if (!preferApi && hasServerApi) {
       let textContent = (typeof prompt === 'object' && prompt.text !== undefined) ? prompt.text : String(prompt || '');
       const atts = (typeof prompt === 'object' && prompt.attachments) ? prompt.attachments : [];
       if (atts.length) {
@@ -1452,13 +1453,13 @@ async function callModel(id,prompt,onTok,signal){
   if(r==='nvidia'){
     via='nvidia';
     m=NMAP[id]||'nvidia/llama-3.1-nemotron-70b-instruct';
-  }else if(r==='gemini' || (!key(id) && (key('gemini') || (S.vaultAvailable && S.vaultAvailable.includes('gemini')) || location.protocol.startsWith('http')))){
+  }else if(r==='gemini' || (!key(id) && (key('gemini') || (S.vaultAvailable && S.vaultAvailable.includes('gemini')) || hasServerApi))){
     via='gemini';
     m=GMAP[id]||'gemini-3.1-flash-lite';
   }
   const k=key(via);
   const hasVaultKey = S.vaultAvailable && (S.vaultAvailable.includes(via) || S.vaultAvailable.includes('gemini'));
-  if(!k && !hasVaultKey && !location.protocol.startsWith('http'))return demo(id,prompt,onTok,signal);
+  if(!k && !hasVaultKey && !hasServerApi)return demo(id,prompt,onTok,signal);
   let res,out='';const add=t=>{if(t){out+=t;onTok(out)}};
   const sys=PERSONAS[id]||`You are ${P[id].n}.`;
   const cfg=CONFIGS[id]||{temperature:0.7,topP:0.9};
@@ -1513,7 +1514,7 @@ async function callModel(id,prompt,onTok,signal){
       }, 30000);
 
       const doGeminiFetch = async (targetModel) => {
-        if (hasVaultKey || !k || location.protocol.startsWith('http')) {
+        if (hasServerApi && (hasVaultKey || !k)) {
           const sRes = await fetch('/api/proxy/stream', {
             method: 'POST',
             signal: internalAbort.signal,
@@ -1628,7 +1629,11 @@ async function callModel(id,prompt,onTok,signal){
   return out;
 }
 async function demo(id,prompt,onTok,signal){
-  const txt=`**Demo mode — no ${P[id].n} key saved.**\n\nAdd a Gemini key under /admin for live answers. Your prompt was:\n\n> ${(typeof prompt==='object'?prompt.text:prompt).slice(0,200)}\n\nThis simulated stream shows how markdown renders in real time:\n\n- bullet one\n- bullet two\n\n\`\`\`js\nconsole.log("hello from ${P[id].n}")\n\`\`\``;
+  const isGitHubPages = location.hostname.endsWith('github.io');
+  const tip = isGitHubPages
+    ? 'Running on GitHub Pages static preview. Add an API key in Settings (Keys icon) to stream live cloud responses, or run locally / Vercel for server-vault access.'
+    : 'Add a Gemini key under /admin for live answers.';
+  const txt=`**Demo mode — no ${P[id].n} key saved.**\n\n${tip}\n\nYour prompt was:\n\n> ${(typeof prompt==='object'?prompt.text:prompt).slice(0,200)}\n\nThis simulated stream shows how markdown renders in real time:\n\n- bullet one\n- bullet two\n\n\`\`\`js\nconsole.log("hello from ${P[id].n}")\n\`\`\``;
   let o='';for(const w of (txt.match(/\S+\s*/g)||[])){if(signal?.aborted)throw new DOMException('x','AbortError');o+=w;onTok(o);await new Promise(r=>setTimeout(r,25+Math.random()*30))}
   return o;
 }
