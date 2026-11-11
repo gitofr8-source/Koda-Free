@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Jump: 2049 | Gemini Experience</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: #0a0a16;
+            color: #00ffff;
+            font-family: 'Segoe UI', Roboto, Helvetica, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        h1 {
+            font-size: 1.5rem;
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+        canvas {
+            background: #12122c;
+            border: 2px solid #ff007f;
+            box-shadow: 0 0 20px rgba(255, 0, 127, 0.4);
+            border-radius: 8px;
+        }
+        #ui {
+            margin-top: 15px;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>QUANTUM JUMP: 2049</h1>
+    <canvas id="gameCanvas" width="600" height="300"></canvas>
+    <div id="ui">Score: <span id="score">0</span> | Press [SPACE] to Jump</div>
+
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        const scoreEl = document.getElementById("score");
+
+        let score = 0;
+        let isGameOver = false;
+
+        // Player (The Quantum Node)
+        let player = {
+            x: 50,
+            y: 220,
+            width: 25,
+            height: 25,
+            dy: 0,
+            jumpPower: -10,
+            gravity: 0.6,
+            grounded: true,
+            color: "#00ffff"
+        };
+
+        // Obstacles (Data Packets)
+        let obstacles = [];
+        let frameCount = 0;
+
+        // Controls
+        window.addEventListener("keydown", (e) => {
+            if (e.code === "Space") {
+                e.preventDefault();
+                if (isGameOver) {
+                    resetGame();
+                } else if (player.grounded) {
+                    player.dy = player.jumpPower;
+                    player.grounded = false;
+                }
+            }
+        });
+
+        function resetGame() {
+            score = 0;
+            obstacles = [];
+            frameCount = 0;
+            isGameOver = false;
+            loop();
+        }
+
+        function spawnObstacle() {
+            let height = Math.floor(Math.random() * 40) + 20;
+            obstacles.push({
+                x: canvas.width,
+                y: 245 - height,
+                width: 20,
+                height: height,
+                speed: 5 + Math.floor(score / 500) // Speeds up over time!
+            });
+        }
+
+        function update() {
+            if (isGameOver) return;
+
+            // Player physics
+            player.dy += player.gravity;
+            player.y += player.dy;
+
+            // Floor collision
+            if (player.y > 220) {
+                player.y = 220;
+                player.dy = 0;
+                player.grounded = true;
+            }
+
+            // Spawn obstacles dynamically
+            frameCount++;
+            if (frameCount % 90 === 0) {
+                spawnObstacle();
+            }
+
+            // Move and check obstacles
+            for (let i = obstacles.length - 1; i >= 0; i--) {
+                obstacles[i].x -= obstacles[i].speed;
+
+                // Collision detection (AABB)
+                if (
+                    player.x < obstacles[i].x + obstacles[i].width &&
+                    player.x + player.width > obstacles[i].x &&
+                    player.y < obstacles[i].y + obstacles[i].height &&
+                    player.y + player.height > obstacles[i].y
+                ) {
+                    isGameOver = true;
+                }
+
+                // Remove off-screen obstacles
+                if (obstacles[i].x + obstacles[i].width < 0) {
+                    obstacles.splice(i, 1);
+                    score += 100;
+                }
+            }
+
+            scoreEl.innerText = score;
+        }
+
+        function draw() {
+            // Clear screen with a cyber-grid feel
+            ctx.fillStyle = "#12122c";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw ground line
+            ctx.strokeStyle = "#ff007f";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, 245);
+            ctx.lineTo(canvas.width, 245);
+            ctx.stroke();
+
+            // Draw Player
+            ctx.fillStyle = player.color;
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = "#00ffff";
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+
+            // Draw Obstacles
+            ctx.fillStyle = "#ff007f";
+            ctx.shadowColor = "#ff007f";
+            for (let obs of obstacles) {
+                ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+            }
+
+            ctx.shadowBlur = 0; // Reset shadow
+
+            // Game Over Screen
+            if (isGameOver) {
+                ctx.fillStyle = "rgba(10, 10, 22, 0.85)";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.fillStyle = "#ff007f";
+                ctx.font = "bold 24px sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText("SYSTEM CRASH", canvas.width / 2, canvas.height / 2 - 15);
+
+                ctx.fillStyle = "#00ffff";
+                ctx.font = "14px sans-serif";
+                ctx.fillText("Press [SPACE] to Reboot", canvas.width / 2, canvas.height / 2 + 20);
+                ctx.textAlign = "left"; // reset
+            }
+        }
+
+        function loop() {
+            update();
+            draw();
+            if (!isGameOver) {
+                requestAnimationFrame(loop);
+            }
+        }
+
+        loop();
+    </script>
+</body>
+</html>

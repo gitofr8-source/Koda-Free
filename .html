@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="theme-color" content="#000000">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AI Hub</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#000;--glass:rgba(255,255,255,.05);--line:rgba(255,255,255,.1)}
+html{scroll-behavior:smooth;scroll-padding-top:72px}html,body{min-height:100%}
+body{margin:0;background:radial-gradient(900px 500px at 10% -10%,rgba(255,255,255,.09),transparent),radial-gradient(800px 500px at 100% 110%,rgba(255,255,255,.06),transparent),var(--bg);color:#e7e9ee;font-family:"Bricolage Grotesque",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+.glass{background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--line);border-radius:16px}
+.card{--c:#fff;display:flex;flex-direction:column;min-height:260px;max-height:70vh;border:1px solid color-mix(in srgb,var(--c) 45%,transparent);box-shadow:0 0 18px color-mix(in srgb,var(--c) 18%,transparent),inset 0 0 24px color-mix(in srgb,var(--c) 6%,transparent)}
+.card .body{flex:1;overflow:auto;padding:12px 14px;font-size:14px;line-height:1.6}
+.dot{width:8px;height:8px;border-radius:99px;background:#6b7280;display:inline-block}
+.dot.streaming{background:#fff;animation:p 1s infinite}.dot.done{background:#fff}.dot.error{background:transparent;box-shadow:inset 0 0 0 2px #fff}
+@keyframes p{50%{opacity:.3}}
+.gv{display:grid;gap:12px;grid-template-columns:1fr}
+@media(min-width:1024px){.gv{grid-template-columns:repeat(var(--cols),minmax(0,1fr))}}
+.md p{margin:.4em 0}.md ul{list-style:disc;padding-left:1.2em}.md ol{list-style:decimal;padding-left:1.4em}
+.md pre{background:#0008;padding:10px;border-radius:10px;overflow:auto;font-size:12px}.md code{font-family:ui-monospace,monospace;font-size:12.5px}
+.md h1,.md h2,.md h3{font-weight:700;margin:.7em 0 .3em}.md a{color:#fff;text-decoration:underline}
+.md table{border-collapse:collapse;font-size:13px}.md td,.md th{border:1px solid var(--line);padding:4px 8px}
+.btn{border:1px solid var(--line);background:var(--glass);border-radius:10px;padding:6px 12px;font-size:13px;cursor:pointer;color:inherit}
+.btn:hover{background:rgba(255,255,255,.12)}.btn.on{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.4)}
+.tog{--c:#fff;display:flex;gap:6px;align-items:center;border:1px solid var(--line);border-radius:99px;padding:5px 12px;font-size:13px;cursor:pointer;opacity:.45;background:transparent;color:inherit}
+.tog.on{opacity:1;border-color:var(--c);box-shadow:0 0 12px color-mix(in srgb,var(--c) 40%,transparent)}
+input,select,textarea{background:rgba(0,0,0,.35);border:1px solid var(--line);border-radius:10px;color:inherit;padding:8px 10px;font-size:14px;width:100%}
+textarea{resize:none;outline:none}
+.nav{position:sticky;top:0;z-index:40;background:rgba(0,0,0,.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+.hero h2{font-size:clamp(2.4rem,6.5vw,4.8rem);line-height:1.02;letter-spacing:-.03em;font-weight:800}
+.cta{display:inline-block;padding:12px 22px;border-radius:12px;font-weight:700;color:#000;background:#fff;box-shadow:0 0 28px rgba(255,255,255,.35)}
+.row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;border:1px solid color-mix(in srgb,var(--c) 45%,transparent);background:color-mix(in srgb,var(--c) 7%,transparent)}
+.bar{height:8px;border-radius:9px;background:linear-gradient(90deg,var(--c),transparent);animation:w 2.4s ease-in-out infinite alternate}
+@keyframes w{from{width:25%}to{width:90%}}
+@media(prefers-reduced-motion:reduce){.bar,.dot.streaming{animation:none}}
+.gem{background:linear-gradient(90deg,#fff,#8a8a8a);-webkit-background-clip:text;background-clip:text;color:transparent}
+</style>
+</head>
+<body style="padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)">
+
+<nav class="nav"><div class="max-w-7xl mx-auto flex items-center gap-3 px-3 py-2">
+  <a href="#top" class="flex items-center gap-2 font-extrabold text-lg mr-auto" id="top">
+    <span class="flex -space-x-1.5"><i class="dot" style="background:#ffffff;width:12px;height:12px"></i><i class="dot" style="background:#cfcfcf;width:12px;height:12px"></i><i class="dot" style="background:#a0a0a0;width:12px;height:12px"></i><i class="dot" style="background:#7a7a7a;width:12px;height:12px"></i><i class="dot" style="background:#e6e6e6;width:12px;height:12px"></i></span>AI Hub</a>
+  <a href="#features" class="hidden sm:inline text-sm opacity-70 hover:opacity-100">Features</a>
+  <a href="#app" class="hidden sm:inline text-sm opacity-70 hover:opacity-100">Workspace</a>
+  <button class="btn" id="kBtn">🔑 API keys</button>
+  <div id="gUser" class="flex items-center gap-2 text-sm"></div><div id="gBtn"></div>
+</div></nav>
+
+<section class="hero max-w-7xl mx-auto px-4 pt-14 pb-12 md:pt-24 md:pb-20 grid md:grid-cols-2 gap-10 items-center">
+  <div>
+    <h2>Ask every AI at once. Keep the best answer.</h2>
+    <p class="mt-5 text-lg opacity-70 max-w-xl">Send one prompt to ChatGPT, Claude, Gemini, Grok and Perplexity, watch them stream side by side, then let a lead model merge the results.</p>
+    <div class="mt-7 flex flex-wrap gap-3 items-center">
+      <a href="#app" class="cta">Open the workspace</a>
+      <button class="btn !py-3 !px-5" onclick="$('#kBtn').click()">Add your API keys</button>
+    </div>
+    <p class="mt-4 text-sm opacity-50">Keys stay in your browser. No account needed to try demo mode.</p>
+  </div>
+  <div class="glass p-4 space-y-2.5" aria-hidden="true">
+    <div class="text-sm opacity-60 mb-1">Summarize the pros and cons of remote work</div>
+    <div class="row" style="--c:#ffffff"><span class="dot done"></span><b class="w-24 text-sm">ChatGPT</b><div class="bar flex-1" style="--c:#ffffff"></div></div>
+    <div class="row" style="--c:#cfcfcf"><span class="dot done"></span><b class="w-24 text-sm">Claude</b><div class="bar flex-1" style="--c:#cfcfcf;animation-delay:-.6s"></div></div>
+    <div class="row" style="--c:#a0a0a0"><span class="dot done"></span><b class="w-24 text-sm">Gemini</b><div class="bar flex-1" style="--c:#a0a0a0;animation-delay:-1.2s"></div></div>
+    <div class="row" style="--c:#7a7a7a"><span class="dot done"></span><b class="w-24 text-sm">Grok</b><div class="bar flex-1" style="--c:#7a7a7a;animation-delay:-1.8s"></div></div>
+    <div class="row" style="--c:#e6e6e6"><span class="dot done"></span><b class="w-24 text-sm">Perplexity</b><div class="bar flex-1" style="--c:#e6e6e6;animation-delay:-2.2s"></div></div>
+  </div>
+</section>
+
+<section id="app" class="max-w-7xl mx-auto">
+<div class="px-3 pt-4 pb-3 flex flex-wrap items-center gap-2">
+  <h3 class="text-2xl font-bold mr-auto">Workspace</h3>
+  <button class="btn" id="hBtn">☰ History</button><button class="btn" id="expJ">Export JSON</button><button class="btn" id="expM">Export MD</button><button class="btn" id="clr">Clear</button>
+</div>
+
+<div class="px-3 pb-2 flex flex-wrap gap-2 items-center" id="toggles"></div>
+<div class="px-3 pb-2 flex flex-wrap gap-2 items-center text-sm">
+  <span class="opacity-60">View</span>
+  <button class="btn" data-v="2">2 col</button><button class="btn" data-v="3">3 col</button><button class="btn" data-v="5">5 col</button><button class="btn" data-v="tab">Tabs</button>
+  <span class="opacity-60 ml-3">Lead</span>
+  <select id="lead" class="!w-auto"></select>
+  <button class="btn" id="syn">✨ Synthesize all answers</button>
+</div>
+
+<div class="flex relative" style="min-height:420px">
+  <aside id="side" class="glass hidden absolute md:static z-20 left-2 top-0 bottom-2 w-72 max-w-[85%] p-3 overflow-auto md:ml-3 md:mb-2" style="background:#0a0a0aee">
+    <div class="font-semibold mb-2">History</div><div id="hist" class="space-y-2 text-sm"></div>
+  </aside>
+  <main class="flex-1 min-w-0 overflow-auto px-3 pb-3">
+    <div id="tabs" class="flex gap-2 mb-2 overflow-auto"></div>
+    <div id="grid" class="gv" style="--cols:3"></div>
+    <div id="synth" class="mt-3"></div>
+  </main>
+</div>
+
+<footer class="p-3 sticky bottom-0 z-10">
+  <div class="glass flex gap-2 p-2 items-end">
+    <textarea id="q" rows="2" placeholder="Ask all enabled models… (Enter to send, Shift+Enter for new line)"></textarea>
+    <button id="send" class="btn !px-5 !py-3 font-semibold" style="background:linear-gradient(90deg,#ffffff55,#a0a0a055)">Send</button>
+  </div>
+</footer>
+</section>
+
+<section id="features" class="max-w-7xl mx-auto px-4 py-16 md:py-24">
+  <h3 class="text-3xl md:text-4xl font-extrabold tracking-tight max-w-2xl">One prompt, five opinions, zero tab-hopping.</h3>
+  <div class="mt-10 grid md:grid-cols-3 gap-8">
+    <div class="pt-4" style="border-top:2px solid #ffffff"><h4 class="font-bold text-lg">Compare side by side</h4><p class="mt-2 opacity-70">Pick 2, 3 or 5 columns or focus on one model in tabs. Toggle any provider off before you send, and see latency and status on every panel.</p></div>
+    <div class="pt-4" style="border-top:2px solid #a0a0a0"><h4 class="font-bold text-lg">Synthesize the answers</h4><p class="mt-2 opacity-70">Choose a lead model and get a summary of where the models agree, where they differ and what to trust.</p></div>
+    <div class="pt-4" style="border-top:2px solid #e6e6e6"><h4 class="font-bold text-lg">Your keys stay local</h4><p class="mt-2 opacity-70">API keys and history live in your browser's localStorage. Requests go straight from your device to each provider.</p></div>
+  </div>
+</section>
+
+<footer class="border-t border-white/10">
+  <div class="max-w-7xl mx-auto px-4 py-8 flex flex-wrap gap-3 justify-between text-sm opacity-60">
+    <span>AI Hub. Works with OpenAI, Anthropic, Google, xAI and Perplexity APIs.</span>
+    <a href="#top" class="hover:opacity-100">Back to top</a>
+  </div>
+</footer>
+
+<div id="modal" class="hidden fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-3">
+  <div class="glass p-4 w-full max-w-lg max-h-[90vh] overflow-auto" style="background:#0a0a0af2">
+    <div class="flex justify-between mb-2"><b>API keys &amp; models</b><button class="btn" id="kClose">Done</button></div>
+    <p class="text-xs opacity-60 mb-3">Stored only in this browser's localStorage. Calls go directly from your browser to each provider. Models without a key run in demo mode.</p>
+    <div id="kForm" class="space-y-3"></div>
+    <div class="mt-4 pt-3 border-t border-white/10">
+      <label class="text-sm">Google OAuth Client ID (for Sign-In)</label>
+      <input id="gid" placeholder="xxxx.apps.googleusercontent.com">
+      <p class="text-xs opacity-60 mt-1">Add this page's origin under Authorized JavaScript origins in Google Cloud Console.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s), ls=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}}, sv=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}};
+const P={
+  openai:{n:'ChatGPT',c:'#ffffff',m:'gpt-4o',alt:'gpt-4o-mini',u:'https://api.openai.com/v1/chat/completions',k:'oai'},
+  anthropic:{n:'Claude',c:'#cfcfcf',m:'claude-3-5-sonnet-latest',u:'https://api.anthropic.com/v1/messages',k:'ant'},
+  gemini:{n:'Gemini',c:'#a0a0a0',m:'gemini-1.5-pro',alt:'gemini-1.5-flash',u:'https://generativelanguage.googleapis.com/v1beta/models/',k:'gem',cls:'gem'},
+  grok:{n:'Grok',c:'#7a7a7a',m:'grok-beta',u:'https://api.x.ai/v1/chat/completions',k:'grk'},
+  perplexity:{n:'Perplexity',c:'#e6e6e6',m:'sonar-pro',u:'https://api.perplexity.ai/chat/completions',k:'ppx'}
+};
+const IDS=Object.keys(P);
+const S={on:ls('hub_on',Object.fromEntries(IDS.map(i=>[i,true]))),view:ls('hub_view','3'),tab:'openai',lead:ls('hub_lead','anthropic'),
+  keys:ls('hub_keys',{}),models:ls('hub_models',{}),hist:ls('hub_hist',[]),cur:null,ctl:{}};
+const model=id=>S.models[id]||P[id].m, key=id=>(S.keys[id]||'').trim();
+const md=t=>{try{return DOMPurify.sanitize(marked.parse(t||''))}catch{return (t||'').replace(/</g,'&lt;').replace(/\n/g,'<br>')}};
+
+/* ---------- Streaming ---------- */
+async function readSSE(res,onData){
+  const r=res.body.getReader(),d=new TextDecoder();let buf='';
+  for(;;){const {done,value}=await r.read();if(done)break;buf+=d.decode(value,{stream:true});
+    let i;while((i=buf.indexOf('\n'))>=0){const line=buf.slice(0,i).trim();buf=buf.slice(i+1);
+      if(line.startsWith('data:')){const v=line.slice(5).trim();if(v&&v!=='[DONE]'){try{onData(JSON.parse(v))}catch{}}}}}
+}
+async function errOf(res){let t='';try{t=await res.text();const j=JSON.parse(t);t=j.error?.message||j.error||t}catch{}return `HTTP ${res.status}: ${String(t).slice(0,300)}`}
+async function callModel(id,prompt,onTok,signal){
+  const k=key(id),m=model(id);
+  if(!k)return demo(id,prompt,onTok,signal);
+  let res,out='';const add=t=>{if(t){out+=t;onTok(out)}};
+  try{
+    if(id==='anthropic'){
+      res=await fetch(P[id].u,{method:'POST',signal,headers:{'content-type':'application/json','x-api-key':k,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+        body:JSON.stringify({model:m,max_tokens:2048,stream:true,messages:[{role:'user',content:prompt}]})});
+      if(!res.ok)throw new Error(await errOf(res));
+      await readSSE(res,j=>{if(j.type==='content_block_delta')add(j.delta?.text)});
+    }else if(id==='gemini'){
+      res=await fetch(`${P[id].u}${m}:streamGenerateContent?alt=sse&key=${encodeURIComponent(k)}`,{method:'POST',signal,headers:{'content-type':'application/json'},
+        body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}]})});
+      if(!res.ok)throw new Error(await errOf(res));
+      await readSSE(res,j=>add(j.candidates?.[0]?.content?.parts?.map(p=>p.text).join('')));
+    }else{ // OpenAI-compatible: openai, grok, perplexity
+      res=await fetch(P[id].u,{method:'POST',signal,headers:{'content-type':'application/json',authorization:'Bearer '+k},
+        body:JSON.stringify({model:m,stream:true,messages:[{role:'user',content:prompt}]})});
+      if(!res.ok)throw new Error(await errOf(res));
+      await readSSE(res,j=>add(j.choices?.[0]?.delta?.content));
+    }
+  }catch(e){
+    if(e.name==='AbortError')throw e;
+    if(e instanceof TypeError)throw new Error('Network/CORS error: the browser blocked this request. Check your key and connection, or route this provider through your own proxy.');
+    throw e;
+  }
+  return out;
+}
+async function demo(id,prompt,onTok,signal){
+  const txt=`**Demo mode — no ${P[id].n} key saved.**\n\nAdd a key under 🔑 Keys for live answers. Your prompt was:\n\n> ${prompt.slice(0,200)}\n\nThis simulated stream shows how markdown renders in real time:\n\n- bullet one\n- bullet two\n\n\`\`\`js\nconsole.log("hello from ${P[id].n}")\n\`\`\``;
+  let o='';for(const w of txt.split(/(?<=\s)/)){if(signal?.aborted)throw new DOMException('x','AbortError');o+=w;onTok(o);await new Promise(r=>setTimeout(r,25+Math.random()*30))}
+  return o;
+}
+
+/* ---------- Run ---------- */
+function newRun(prompt){return {id:Date.now(),prompt,ts:new Date().toISOString(),res:Object.fromEntries(IDS.map(i=>[i,{text:'',ms:null,status:'idle'}])),synth:null}}
+async function runOne(id,prompt,res,after){
+  const ctl=new AbortController();S.ctl[id]=ctl;const t0=performance.now();res.status='streaming';res.text='';res.ms=null;paint(id);
+  try{res.text=await callModel(id,prompt,t=>{res.text=t;res.ms=Math.round(performance.now()-t0);paintBody(id)},ctl.signal);res.status='done'}
+  catch(e){res.status=e.name==='AbortError'?'idle':'error';if(res.status==='error')res.text='**Error:** '+e.message}
+  res.ms=Math.round(performance.now()-t0);paint(id);after?.();
+}
+async function send(){
+  const prompt=$('#q').value.trim();if(!prompt)return;
+  const act=IDS.filter(i=>S.on[i]);if(!act.length)return alert('Toggle at least one model ON.');
+  $('#q').value='';S.cur=newRun(prompt);S.hist.unshift(S.cur);$('#synth').innerHTML='';render();
+  await Promise.all(act.map(i=>runOne(i,prompt,S.cur.res[i])));
+  S.hist=S.hist.slice(0,30);sv('hub_hist',S.hist);renderHist();
+}
+async function synth(){
+  const c=S.cur;if(!c)return;
+  const parts=IDS.filter(i=>c.res[i].status==='done'&&c.res[i].text).map(i=>`### ${P[i].n}\n${c.res[i].text}`);
+  if(parts.length<2)return alert('Need at least 2 completed answers to synthesize.');
+  const lead=S.lead,prompt=`You are the lead synthesizer. Below are answers from several AI models to the same question. Write a consolidated comparative summary in markdown: (1) points of agreement, (2) key differences or disagreements, (3) any likely errors or unsupported claims, (4) a final best-answer synthesis.\n\nQuestion: ${c.prompt}\n\n${parts.join('\n\n')}`;
+  const box=$('#synth');box.innerHTML=`<div class="glass p-3" style="border-color:${P[lead].c}"><div class="font-semibold mb-2">✨ Synthesis by ${P[lead].n} <span id="sS" class="text-xs opacity-60">streaming…</span></div><div id="sB" class="md text-sm"></div></div>`;
+  const t0=performance.now();
+  try{c.synth=await callModel(lead,prompt,t=>{$('#sB').innerHTML=md(t)},new AbortController().signal);$('#sS').textContent=`done · ${Math.round(performance.now()-t0)} ms`}
+  catch(e){$('#sB').innerHTML=md('**Error:** '+e.message);$('#sS').textContent='error'}
+  sv('hub_hist',S.hist);
+}
+
+/* ---------- Render ---------- */
+function cardHTML(id){
+  const p=P[id],r=S.cur?.res[id]||{text:'',ms:null,status:'idle'};
+  return `<section class="card glass" id="c-${id}" style="--c:${p.c}">
+    <div class="flex items-center gap-2 px-3 py-2 border-b border-white/10">
+      <span class="dot ${r.status}" id="d-${id}"></span>
+      <b class="${p.cls||''}" style="${p.cls?'':'color:'+p.c}">${p.n}</b>
+      <span class="text-xs opacity-50 truncate">${model(id)}</span>
+      <span id="s-${id}" class="text-xs opacity-60 ml-auto">${r.status}</span>
+      <span id="l-${id}" class="text-xs px-2 py-0.5 rounded-full bg-white/10">${r.ms!=null?r.ms+' ms':'— ms'}</span>
+      <button class="btn !py-0.5 !px-2" onclick="copy('${id}')">Copy</button>
+    </div>
+    <div class="body md" id="b-${id}">${r.text?md(r.text):'<span class="opacity-40">Waiting for a prompt…</span>'}</div></section>`;
+}
+function render(){
+  $('#toggles').innerHTML=IDS.map(i=>`<button class="tog ${S.on[i]?'on':''}" style="--c:${P[i].c}" data-t="${i}"><span class="dot" style="background:${P[i].c}"></span>${P[i].n}</button>`).join('');
+  $('#lead').innerHTML=IDS.map(i=>`<option value="${i}" ${S.lead===i?'selected':''}>${P[i].n}</option>`).join('');
+  document.querySelectorAll('[data-v]').forEach(b=>b.classList.toggle('on',b.dataset.v===S.view));
+  const tab=S.view==='tab',ids=tab?[S.tab]:IDS.filter(i=>S.on[i]);
+  $('#tabs').innerHTML=tab?IDS.map(i=>`<button class="btn ${S.tab===i?'on':''}" style="${S.tab===i?'border-color:'+P[i].c:''}" data-tab="${i}">${P[i].n}</button>`).join(''):'';
+  const g=$('#grid');g.style.setProperty('--cols',tab?1:S.view);g.innerHTML=ids.map(cardHTML).join('')||'<div class="opacity-50 p-6">No models enabled.</div>';
+}
+function paint(id){const r=S.cur?.res[id];if(!r||!$('#d-'+id))return;$('#d-'+id).className='dot '+r.status;$('#s-'+id).textContent=r.status;$('#l-'+id).textContent=r.ms!=null?r.ms+' ms':'— ms';paintBody(id)}
+const pend={};function paintBody(id){if(pend[id])return;pend[id]=requestAnimationFrame(()=>{pend[id]=0;const b=$('#b-'+id),r=S.cur?.res[id];if(b&&r){const bot=b.scrollTop+b.clientHeight>=b.scrollHeight-40;b.innerHTML=md(r.text);if(bot)b.scrollTop=b.scrollHeight;const l=$('#l-'+id);if(l&&r.ms!=null)l.textContent=r.ms+' ms'}})}
+function copy(id){navigator.clipboard?.writeText(S.cur?.res[id]?.text||'')}
+function renderHist(){
+  $('#hist').innerHTML=S.hist.length?S.hist.map((h,i)=>`<button class="btn w-full text-left" data-h="${i}"><div class="truncate">${h.prompt.replace(/</g,'&lt;')}</div><div class="text-xs opacity-50">${new Date(h.ts).toLocaleString()}</div></button>`).join(''):'<div class="opacity-50">No history yet.</div>';
+}
+
+/* ---------- Export ---------- */
+function dl(name,txt,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
+function toMD(){return S.hist.map(h=>`## ${h.prompt}\n_${h.ts}_\n\n`+IDS.filter(i=>h.res[i].text).map(i=>`### ${P[i].n} (${h.res[i].ms??'?'} ms)\n\n${h.res[i].text}\n`).join('\n')+(h.synth?`\n### Synthesis\n\n${h.synth}\n`:'')).join('\n---\n\n')}
+
+/* ---------- Keys modal ---------- */
+function buildKeys(){
+  $('#kForm').innerHTML=IDS.map(i=>`<div><label class="text-sm" style="color:${P[i].c}">${P[i].n}</label>
+    <div class="flex gap-2"><input type="password" autocomplete="off" data-key="${i}" placeholder="API key" value="${S.keys[i]||''}">
+    <input data-model="${i}" placeholder="${P[i].m}" value="${S.models[i]||''}" style="max-width:48%"></div>
+    ${P[i].alt?`<div class="text-xs opacity-50 mt-0.5">Also works: ${P[i].alt}</div>`:''}</div>`).join('');
+  $('#gid').value=ls('hub_gid','');
+}
+function saveKeys(){
+  document.querySelectorAll('[data-key]').forEach(e=>S.keys[e.dataset.key]=e.value.trim());
+  document.querySelectorAll('[data-model]').forEach(e=>{const v=e.value.trim();if(v)S.models[e.dataset.model]=v;else delete S.models[e.dataset.model]});
+  sv('hub_keys',S.keys);sv('hub_models',S.models);const g=$('#gid').value.trim();if(g!==ls('hub_gid','')){sv('hub_gid',g);location.reload();return}
+  $('#modal').classList.add('hidden');render();
+}
+
+/* ---------- Google Sign-In ---------- */
+function initGoogle(){
+  const cid=ls('hub_gid','');const u=ls('hub_user',null);
+  if(u){$('#gUser').innerHTML=`<img src="${u.picture}" class="w-6 h-6 rounded-full" referrerpolicy="no-referrer"><span class="hidden sm:inline">${u.name}</span><button class="btn !py-0.5" id="so">Sign out</button>`;$('#so').onclick=()=>{localStorage.removeItem('hub_user');location.reload()};return}
+  if(!cid){$('#gBtn').innerHTML='<button class="btn" onclick="$(\'#kBtn\').click()">Sign in with Google</button>';return}
+  if(!window.google?.accounts)return setTimeout(initGoogle,400);
+  google.accounts.id.initialize({client_id:cid,callback:r=>{try{const b=r.credential.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');const j=JSON.parse(decodeURIComponent(escape(atob(b))));sv('hub_user',{name:j.name,picture:j.picture,email:j.email});location.reload()}catch(e){alert('Sign-in failed')}}});
+  google.accounts.id.renderButton($('#gBtn'),{theme:'filled_black',size:'medium'});
+}
+
+/* ---------- Events ---------- */
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-t],[data-v],[data-tab],[data-h]');if(!t)return;
+  if(t.dataset.t){S.on[t.dataset.t]=!S.on[t.dataset.t];sv('hub_on',S.on);render()}
+  else if(t.dataset.v){S.view=t.dataset.v;sv('hub_view',S.view);render()}
+  else if(t.dataset.tab){S.tab=t.dataset.tab;render()}
+  else if(t.dataset.h!==undefined){S.cur=S.hist[+t.dataset.h];$('#synth').innerHTML=S.cur.synth?`<div class="glass p-3"><div class="font-semibold mb-2">✨ Synthesis</div><div class="md text-sm">${md(S.cur.synth)}</div></div>`:'';render();if(innerWidth<768)$('#side').classList.add('hidden')}
+});
+$('#send').onclick=send;
+$('#q').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});
+$('#syn').onclick=synth;
+$('#lead').onchange=e=>{S.lead=e.target.value;sv('hub_lead',S.lead)};
+$('#hBtn').onclick=()=>{const s=$('#side');s.classList.toggle('hidden');if(innerWidth>=768)s.classList.toggle('md:block')};
+$('#kBtn').onclick=()=>{buildKeys();$('#modal').classList.remove('hidden')};
+$('#kClose').onclick=saveKeys;
+$('#clr').onclick=()=>{Object.values(S.ctl).forEach(c=>c.abort());S.cur=null;$('#synth').innerHTML='';render()};
+$('#expJ').onclick=()=>dl('ai-hub-export.json',JSON.stringify(S.hist,null,2),'application/json');
+$('#expM').onclick=()=>dl('ai-hub-export.md',toMD(),'text/markdown');
+render();renderHist();initGoogle();
+</script>
+</body>
+</html>

@@ -1,0 +1,3233 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Koda — Unified Workspace</title>
+<meta name="description" content="Parallel multi-engine workspace. Compare and synthesize responses across models side by side.">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Koda">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;500;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<link rel="stylesheet" href="theme-styles.css">
+<script src="theme-manager.js"></script>
+<script src="update-manager.js" defer></script>
+
+<style>
+:root {
+  --bg: #000000;
+  --panel: #0a0a0a;
+  --border: rgba(255, 255, 255, 0.35);
+  --border-muted: rgba(255, 255, 255, 0.16);
+  --text: #e7e9ee;
+  --text-muted: #8e94a0;
+  --btn-bg: rgba(255, 255, 255, 0.08);
+  --btn-solid-bg: #ffffff;
+  --btn-solid-text: #000000;
+  --card-bg: #0a0a0a;
+}
+
+html.light {
+  --bg: #ffffff;
+  --panel: #f7f7f8;
+  --border: rgba(0, 0, 0, 0.22);
+  --border-muted: rgba(0, 0, 0, 0.1);
+  --text: #0a0a0a;
+  --text-muted: #5a606c;
+  --btn-bg: rgba(0, 0, 0, 0.04);
+  --btn-solid-bg: #000000;
+  --btn-solid-text: #ffffff;
+  --card-bg: #ffffff;
+}
+
+/* Invert all light mode colors cleanly */
+html.light body {
+  background-color: #ffffff !important;
+  color: #0a0a0a !important;
+}
+
+html.light .text-white {
+  color: #000000 !important;
+}
+
+html.light .text-\[\#e7e9ee\] {
+  color: #0a0a0a !important;
+}
+
+html.light .text-\[\#8e94a0\] {
+  color: #5a606c !important;
+}
+
+html.light .bg-black {
+  background-color: #ffffff !important;
+}
+
+html.light .bg-black\/80 {
+  background-color: rgba(0, 0, 0, 0.45) !important;
+}
+
+html.light .bg-white\/5 {
+  background-color: rgba(0, 0, 0, 0.03) !important;
+}
+
+html.light .bg-white\/10 {
+  background-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+html.light .bg-white\/20 {
+  background-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+html.light .border-white\/10 {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+html.light .border-white\/20 {
+  border-color: rgba(0, 0, 0, 0.15) !important;
+}
+
+html.light .panel {
+  background-color: #f7f7f8 !important;
+  border-color: rgba(0, 0, 0, 0.18) !important;
+  color: #0a0a0a !important;
+}
+
+html.light .demo-panel {
+  background-color: #f7f7f8 !important;
+  border-color: rgba(0, 0, 0, 0.18) !important;
+}
+
+html.light .card {
+  background-color: #ffffff !important;
+  border-color: rgba(0, 0, 0, 0.18) !important;
+}
+
+html.light .card .body {
+  color: #0a0a0a !important;
+}
+
+html.light .solid-btn {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+html.light .solid-btn:hover {
+  opacity: 0.85 !important;
+}
+
+html.light .btn {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+  border-color: rgba(0, 0, 0, 0.22) !important;
+  color: #000000 !important;
+}
+
+html.light .btn:hover {
+  background-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+html.light .btn.on {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border-color: #000000 !important;
+}
+
+html.light .dot {
+  background: #a0a0a0;
+}
+html.light .dot.done,
+html.light .dot.streaming {
+  background: #000000 !important;
+}
+html.light .dot.error {
+  box-shadow: inset 0 0 0 1.5px #000000 !important;
+}
+
+html.light input,
+html.light select,
+html.light textarea {
+  background-color: #ffffff !important;
+  border-color: rgba(0, 0, 0, 0.2) !important;
+  color: #0a0a0a !important;
+}
+
+html.light textarea#q {
+  background-color: transparent !important;
+  border: 0 !important;
+  color: #0a0a0a !important;
+}
+
+html.light textarea#q::placeholder {
+  color: #6c7380 !important;
+}
+
+html.light .nav-wrap {
+  background-color: rgba(255, 255, 255, 0.94) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+html.light .md pre {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+  color: #0a0a0a !important;
+}
+
+html.light .md code {
+  color: #0a0a0a !important;
+}
+
+html.light .md a {
+  color: #000000 !important;
+}
+
+html.light .md table td,
+html.light .md table th {
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+html.light #supChatBox {
+  background-color: #ffffff !important;
+  border-color: rgba(0, 0, 0, 0.15) !important;
+}
+
+html.light .attach-chip {
+  background-color: #ffffff !important;
+  border-color: rgba(0, 0, 0, 0.16) !important;
+  color: #0a0a0a !important;
+}
+html.light .attach-chip .chip-name {
+  color: #000000 !important;
+}
+html.light .attach-chip .chip-sub {
+  color: #5a606c !important;
+}
+html.light .attach-chip svg {
+  color: #000000 !important;
+}
+html.light #clipBtn svg {
+  color: #000000 !important;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 80px;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  overflow-x: hidden;
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: 'Bricolage Grotesque', -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", "Segoe UI", sans-serif;
+  letter-spacing: -0.015em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  position: relative;
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+  padding-bottom: calc(6rem + env(safe-area-inset-bottom, 0px));
+}
+
+/* macOS & Modern Desktop Subtle Overlay Scrollbars */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 9999px;
+  border: 1.5px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.38);
+  background-clip: content-box;
+}
+html.light ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.18);
+  background-clip: content-box;
+}
+html.light ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.38);
+  background-clip: content-box;
+}
+
+body.modal-open {
+  overflow: hidden !important;
+  position: fixed !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.font-mono, code, pre, .mono-num {
+  font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace !important;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Panels: 16px radius, #0a0a0a with 1px border at 35% white */
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+
+/* Hero demo panel: 20px radius */
+.demo-panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+}
+
+/* Buttons: 10px radius */
+.btn, button, .solid-btn {
+  border-radius: 10px !important;
+  font-family: inherit;
+  transition: background-color 0.15s, border-color 0.15s, opacity 0.15s, transform 0.1s;
+}
+
+.btn {
+  border: 1px solid var(--border);
+  background: var(--btn-bg);
+  color: var(--text);
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+html.light .btn:hover {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.btn.on {
+  background: var(--btn-solid-bg);
+  color: var(--btn-solid-text);
+  border-color: var(--btn-solid-bg);
+}
+
+.solid-btn {
+  background: var(--btn-solid-bg);
+  color: var(--btn-solid-text);
+  padding: 11px 22px;
+  font-size: 14px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.solid-btn:hover {
+  opacity: 0.9;
+}
+
+/* AI Workspace cards: 16px radius, #0a0a0a, 1px border at 35% white */
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  min-height: 280px;
+  max-height: 72vh;
+  max-height: 72dvh;
+}
+
+.card .body {
+  flex: 1;
+  overflow: auto;
+  padding: 14px 16px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 99px;
+  background: #666;
+  display: inline-block;
+}
+.dot.streaming { background: #fff; animation: pulseDot 1s infinite; }
+.dot.done { background: #fff; }
+.dot.error { background: transparent; box-shadow: inset 0 0 0 1.5px #fff; }
+
+@keyframes pulseDot { 50% { opacity: 0.25; } }
+
+/* Grid views */
+.gv { display: grid; gap: 14px; grid-template-columns: 1fr; }
+@media(min-width: 640px) { .gv { grid-template-columns: repeat(var(--tcols, 1), minmax(0, 1fr)); } }
+@media(min-width: 1024px) { .gv { grid-template-columns: repeat(var(--mcols, 1), minmax(0, 1fr)); } }
+@media(min-width: 1280px) { .gv { grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); } }
+
+/* Inputs */
+input, select, textarea {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  padding: 9px 12px;
+  font-size: 14px;
+  width: 100%;
+}
+textarea { resize: none; outline: none; }
+
+/* Sticky nav with iOS Notch & Dynamic Island Safe Area */
+.nav-wrap {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgba(0, 0, 0, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border-muted);
+  padding-top: max(0.5rem, env(safe-area-inset-top, 0px));
+}
+html.light .nav-wrap {
+  background: rgba(255, 255, 255, 0.92);
+}
+
+/* Markdown prose with mobile blowout prevention */
+.md {
+  word-break: break-word !important;
+  overflow-wrap: anywhere !important;
+}
+.md p { margin: 0.4em 0; }
+.md ul { list-style: disc; padding-left: 1.2em; }
+.md ol { list-style: decimal; padding-left: 1.4em; }
+.md pre {
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid var(--border-muted);
+  padding: 10px 12px;
+  border-radius: 10px;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  max-width: 100% !important;
+  font-size: 12.5px;
+  white-space: pre !important;
+}
+.md code {
+  word-break: break-all;
+}
+.md a { color: var(--text); text-decoration: underline; }
+.md table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.md td, .md th { border: 1px solid var(--border-muted); padding: 5px 8px; }
+
+::selection { background: #fff; color: #000; }
+html.light ::selection { background: #000; color: #fff; }
+
+/* Grid columns & card containment on mobile screens */
+.gv, .card, .body, #mainView, main {
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+/* Sticky Prompt Bar with Home Indicator Safe Area & Keyboard Offset */
+#promptPanel {
+  position: sticky;
+  bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px)) !important;
+  z-index: 30;
+  transition: transform 0.12s ease-out, bottom 0.12s ease-out;
+}
+
+/* Horizontal scrolling strips & touch physics */
+.touch-scroll, #tabs, #toggles {
+  -webkit-overflow-scrolling: touch !important;
+  scrollbar-width: none;
+}
+.touch-scroll::-webkit-scrollbar,
+#tabs::-webkit-scrollbar,
+#toggles::-webkit-scrollbar {
+  display: none;
+}
+
+/* Prevent flex button squishing on narrow screens */
+#tabs > button,
+#toggles > button,
+#promptPanel .overflow-x-auto button,
+.model-btn,
+.action-btn {
+  flex-shrink: 0 !important;
+}
+
+button, .btn, .solid-btn, a, input, select, textarea {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn, button, .solid-btn {
+  -webkit-touch-callout: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+@media (max-width: 768px) {
+  /* Prevent iOS automatic zoom on focus by enforcing 16px */
+  input, select, textarea, #q {
+    font-size: 16px !important;
+  }
+  .btn, .solid-btn {
+    min-height: 38px;
+  }
+  .card .body {
+    max-height: 52vh;
+    -webkit-overflow-scrolling: touch;
+  }
+  #spotifyFloatingPill {
+    bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px)) !important;
+    right: max(1rem, env(safe-area-inset-right, 0px)) !important;
+  }
+  #promptPanel {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    border-radius: 14px !important;
+  }
+}
+.hidden {
+  display: none !important;
+}
+.page-view {
+  min-height: 85vh;
+  animation: fadeIn 0.2s ease-in-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0.2; transform: translateY(2px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body id="top">
+
+<!-- Floating 1-Click Direct Website Install Banner -->
+<div id="directInstallBanner" class="hidden fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:bottom-6 sm:max-w-sm z-50 p-3.5 rounded-[16px] bg-[#101216]/95 backdrop-blur-md border border-white/20 shadow-2xl flex items-center justify-between gap-3 animate-fade-in">
+  <div class="flex items-center gap-3 min-w-0">
+    <img src="icon-192.png" alt="Koda" class="w-10 h-10 rounded-[10px] border border-white/10 flex-shrink-0 bg-black">
+    <div class="min-w-0">
+      <div class="font-extrabold text-white text-xs sm:text-sm tracking-tight truncate">Install Koda App</div>
+      <div class="text-[11px] text-[#8e94a0] truncate" id="installBannerSub">Direct 1-tap install from website</div>
+    </div>
+  </div>
+  <div class="flex items-center gap-1.5 flex-shrink-0">
+    <button type="button" onclick="triggerDirectAppInstall()" class="solid-btn !py-1.5 !px-3.5 text-xs font-bold whitespace-nowrap">
+      Install
+    </button>
+    <button type="button" onclick="dismissInstallBanner()" class="btn !p-1.5 text-xs text-[#8e94a0] hover:text-white" title="Dismiss">
+      ✕
+    </button>
+  </div>
+</div>
+
+<!-- Navigation: Wordmark left, plain links center, theme toggle + + New Chat button right -->
+<nav class="nav-wrap">
+  <div class="max-w-7xl mx-auto flex items-center justify-between px-6 py-3.5">
+    <!-- Wordmark on the left -->
+    <a href="#home" onclick="navigateToLanding(); return false;" class="text-xl font-extrabold tracking-tight text-white hover:opacity-90 flex items-center gap-2 cursor-pointer">
+      Koda
+    </a>
+
+    <!-- Plain links centered + Spotify tab button -->
+    <div class="hidden md:flex items-center gap-7 text-sm font-medium text-[#8e94a0]">
+      <a href="#home" onclick="navigateToLanding(); return false;" class="hover:text-white transition cursor-pointer">Home</a>
+      <a href="#models" onclick="navigateToLanding('models'); return false;" class="hover:text-white transition cursor-pointer">Models</a>
+      <a href="chat.html" class="hover:text-white transition cursor-pointer">Workspace</a>
+      <a href="chat.html?model=koda" class="hover:text-white transition flex items-center gap-1.5 text-white cursor-pointer" title="Focus Koda AI">
+        <span class="w-2 h-2 rounded-full bg-white"></span>
+        <span class="font-semibold text-white">Koda AI</span>
+      </a>
+      <a href="chat.html#synth" class="hover:text-white transition cursor-pointer">Synthesis</a>
+      <a href="javascript:void(0)" onclick="$('#supModal').classList.remove('hidden')" class="hover:text-white transition cursor-pointer">Support</a>
+      <a href="javascript:void(0)" onclick="window.openThemeModal()" class="hover:text-white transition cursor-pointer flex items-center gap-1.5" title="Customize Themes & Colors">
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20Z"/></svg>
+        <span>Theme</span>
+      </a>
+      <button id="navSpotifyBtn" class="hover:text-white transition flex items-center gap-1.5 cursor-pointer bg-transparent border-0 p-0 text-sm font-medium text-[#8e94a0]" title="Open Spotify Controls">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="#1db954"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.498 17.306c-.218.358-.684.47-1.042.252-2.855-1.744-6.45-2.14-10.684-1.173-.41.093-.815-.164-.908-.573-.093-.41.164-.816.574-.908 4.637-1.06 8.604-.61 11.808 1.35.358.218.47.684.252 1.052zm1.468-3.26c-.274.446-.86.588-1.306.314-3.268-2.008-8.25-2.59-12.114-1.417-.497.15-1.026-.135-1.176-.632-.15-.497.135-1.026.632-1.176 4.414-1.34 9.907-.692 13.65 1.605.446.274.588.86.314 1.306zm.135-3.394c-3.92-2.328-10.38-2.543-14.135-1.403-.6.182-1.24-.163-1.422-.763-.182-.6.163-1.24.763-1.422 4.314-1.31 11.443-1.06 15.932 1.604.54.32.716 1.022.396 1.562-.32.54-1.022.716-1.562.396z"/></svg>
+        <span>Spotify</span>
+      </button>
+    </div>
+
+    <!-- Right: Theme toggle + + New Chat button -->
+    <div class="flex items-center gap-3">
+      <!-- Real-Time Multi-Device Sync Status -->
+      <div id="syncIndicator" class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-[#8e94a0]" title="Real-time Multi-Device Local Sync (updates sync live across all connected phones, tablets & PCs)">
+        <span class="w-1.5 h-1.5 rounded-full bg-[#1db954] shadow-[0_0_6px_#1db954]"></span>
+        <span id="syncDeviceCount">1 device synced</span>
+      </div>
+
+      <!-- Mobile Koda AI Button (Visible on phone/tablet) -->
+      <a href="chat.html?model=koda" class="md:hidden btn !py-1.5 !px-2.5 text-xs font-bold flex items-center gap-1.5 text-white bg-white/10 hover:bg-white/20 border border-white/20" title="Open Koda AI"><span class="w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_6px_#fff]"></span><span>Koda AI</span></a>
+
+      <!-- Mobile Spotify Button (Visible on phone/tablet) -->
+      <button id="mobileSpotifyBtn" class="md:hidden btn !p-2 flex items-center justify-center text-white" aria-label="Spotify Controls" title="Open Spotify Controls" onclick="openSpotifyModal()">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="#1db954"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.498 17.306c-.218.358-.684.47-1.042.252-2.855-1.744-6.45-2.14-10.684-1.173-.41.093-.815-.164-.908-.573-.093-.41.164-.816.574-.908 4.637-1.06 8.604-.61 11.808 1.35.358.218.47.684.252 1.052zm1.468-3.26c-.274.446-.86.588-1.306.314-3.268-2.008-8.25-2.59-12.114-1.417-.497.15-1.026-.135-1.176-.632-.15-.497.135-1.026.632-1.176 4.414-1.34 9.907-.692 13.65 1.605.446.274.588.86.314 1.306zm.135-3.394c-3.92-2.328-10.38-2.543-14.135-1.403-.6.182-1.24-.163-1.422-.763-.182-.6.163-1.24.763-1.422 4.314-1.31 11.443-1.06 15.932 1.604.54.32.716 1.022.396 1.562-.32.54-1.022.716-1.562.396z"/></svg>
+      </button>
+
+      <button id="themeToggle" onclick="window.toggleTheme()" class="btn !p-2 flex items-center justify-center text-white cursor-pointer" aria-label="Toggle light or dark theme" title="Quick toggle Light / Dark">
+        <!-- Sun icon (for dark mode) -->
+        <svg id="themeIconSun" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+        </svg>
+        <!-- Moon icon (for light mode) -->
+        <svg id="themeIconMoon" class="w-4 h-4 hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+        </svg>
+      </button>
+
+      <button id="themeSettingsBtn" onclick="window.openThemeModal()" class="btn !p-2 flex items-center justify-center text-white cursor-pointer" aria-label="Theme settings" title="Theme Settings (Pure AMOLED & Light Mode)">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/>
+          <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/>
+          <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/>
+          <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/>
+          <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.563-2.512 5.563-5.563C22 6.5 17.5 2 12 2Z"/>
+        </svg>
+      </button>
+
+      <!-- Unified Direct 1-Click Install App Button (Visible by default until running in standalone mode) -->
+      <button id="unifiedInstallBtn" class="solid-btn !py-2 !px-3.5 text-xs font-bold flex items-center gap-1.5 shadow-md hover:opacity-90 transition" title="Install Koda directly to your device from the website" onclick="triggerDirectAppInstall()">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        <span id="unifiedInstallBtnText">Install App</span>
+      </button>
+
+      <!-- Hidden triggers for legacy compatibility -->
+      <button id="installAppBtn" class="hidden"></button>
+      <button id="installIosBtn" class="hidden"></button>
+      <button id="installMacBtn" class="hidden"></button>
+      <button id="installAndroidBtn" class="hidden"></button>
+
+      <!-- Nav + New Chat Button -->
+      <a href="chat.html?new=1" id="navNewChatBtn" class="solid-btn !py-2 !px-3.5 text-xs font-bold flex items-center gap-1.5 shadow-md hover:scale-105 transition cursor-pointer" title="Open Workspace and start a fresh chat"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span>+ New Chat</span></a>
+
+      <!-- Nav Workspace Button -->
+      <button type="button" id="navOpenWsBtn" onclick="navigateToWorkspace(false)" class="btn !py-2 !px-3.5 text-xs font-semibold hidden lg:flex items-center gap-1.5 hover:text-white transition cursor-pointer" title="Switch to Workspace view">
+        <span>Workspace</span>
+        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+
+      <!-- Nav Account / Sign In -->
+      <a href="login.html" id="navAuthLink" class="btn !py-2 !px-3 text-xs font-semibold flex items-center gap-1.5 hover:text-white transition cursor-pointer" title="Account">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span id="navAuthText">Sign in</span>
+      </a>
+
+      <!-- Hidden trigger for compatibility with existing support handler -->
+      <button id="supBtn" class="hidden"></button>
+      <div id="gUser" class="hidden"></div>
+      <div id="gBtn" class="hidden"></div>
+    </div>
+  </div>
+</nav>
+
+<!-- ========================================================================= -->
+<!-- PAGE 1: LANDING VIEW (Hero & Models Showcase)                            -->
+<!-- ========================================================================= -->
+<div id="view-landing" class="page-view">
+  <!-- Hero -->
+  <section class="max-w-7xl mx-auto px-6 py-20 lg:py-28">
+    <div class="max-w-3xl">
+      <h1 class="text-white text-5xl sm:text-6xl lg:text-[4.5rem] font-bold tracking-tight leading-tight">
+        Compare models in parallel. Side by side.
+      </h1>
+      <p class="mt-6 text-base sm:text-lg text-[#8e94a0] leading-relaxed max-w-xl">
+        Query multiple engines simultaneously. Compare outputs and generate clean syntheses in a unified workspace.
+      </p>
+      <div class="mt-8 flex flex-wrap items-center gap-4 sm:gap-6">
+        <!-- Prominent + New Chat Button that opens Page 2 Workspace -->
+        <a href="chat.html?new=1" class="solid-btn !py-3 !px-6 text-sm font-semibold flex items-center gap-2.5 hover:opacity-90 transition cursor-pointer"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span>+ New Chat</span></a>
+        <a href="chat.html" class="btn text-sm font-medium flex items-center gap-2 cursor-pointer hover:border-white/40"><span>Open workspace</span><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></a>
+        <a href="chat.html?model=koda" class="btn text-sm font-medium flex items-center gap-2 text-[#8e94a0] hover:text-white cursor-pointer"><span class="w-2 h-2 rounded-full bg-white"></span><span>Open Koda</span></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Models Section -->
+  <section id="models" class="max-w-7xl mx-auto px-6 py-12 border-t border-white/10">
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div>
+        <div class="text-[11px] font-mono uppercase tracking-widest text-white/60 mb-2">Engines</div>
+        <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+          Parallel Multi-Engine Comparator.
+        </h2>
+        <p class="mt-2 text-sm text-[#8e94a0] max-w-2xl">
+          Compare responses across ChatGPT, Claude, Gemini, Perplexity, and DeepSeek with unified synthesis.
+        </p>
+      </div>
+      <div class="flex items-center gap-2.5">
+        <a href="chat.html?new=1" class="solid-btn !py-2 !px-4 text-xs font-semibold flex items-center gap-2 cursor-pointer hover:opacity-90 transition"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span>+ New Chat</span></a>
+        <a href="chat.html?model=koda" class="btn !py-2 !px-4 text-xs font-medium flex items-center gap-2 self-start md:self-auto !bg-white/10 !text-white hover:!bg-white/20 cursor-pointer"><span class="w-1.5 h-1.5 rounded-full bg-white"></span><span>Open Koda</span></a>
+      </div>
+    </div>
+    <div class="mt-6 flex flex-wrap gap-2.5">
+      <a href="chat.html?model=koda" class="btn !py-2 !px-4 text-xs font-mono !bg-white !text-black font-semibold flex items-center gap-1.5 cursor-pointer hover:opacity-90"><span class="w-1.5 h-1.5 rounded-full bg-black"></span>Koda</a>
+      <a href="chat.html?model=chatgpt" class="btn !py-2 !px-4 text-xs font-mono hover:text-white cursor-pointer">ChatGPT</a>
+      <a href="chat.html?model=claude" class="btn !py-2 !px-4 text-xs font-mono hover:text-white cursor-pointer">Claude</a>
+      <a href="chat.html?model=gemini" class="btn !py-2 !px-4 text-xs font-mono hover:text-white cursor-pointer">Gemini</a>
+      <a href="chat.html?model=perplexity" class="btn !py-2 !px-4 text-xs font-mono hover:text-white cursor-pointer">Perplexity</a>
+      <a href="chat.html?model=deepseek" class="btn !py-2 !px-4 text-xs font-mono hover:text-white cursor-pointer">DeepSeek</a>
+    </div>
+  </section>
+
+  <!-- Footer (Landing Page) -->
+  <footer class="border-t border-white/10 mt-16">
+    <div class="max-w-7xl mx-auto px-6 py-10 flex flex-wrap gap-4 justify-between items-center text-xs text-[#8e94a0]">
+      <span>Koda. Works with OpenAI, Anthropic, Google, Perplexity, and DeepSeek cloud APIs.</span>
+      <div class="flex items-center gap-6">
+        <a href="#models" onclick="navigateToLanding('models'); return false;" class="hover:text-white transition">Models</a>
+        <a href="chat.html" class="hover:text-white transition cursor-pointer">Workspace</a>
+        <a href="javascript:void(0)" onclick="$('#supModal').classList.remove('hidden')" class="hover:text-white transition underline">Support &amp; Help</a>
+        <a href="#top" onclick="window.scrollTo({top:0, behavior:'smooth'}); return false;" class="hover:text-white transition">Back to top</a>
+      </div>
+    </div>
+  </footer>
+</div>
+
+
+<!-- Support Modal (Preserved & Styled) -->
+<div id="supModal" class="hidden fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-3 sm:p-4">
+  <div class="panel p-4 sm:p-6 w-[95vw] max-w-lg overflow-y-auto touch-scroll" style="max-height:90vh;max-height:90dvh;">
+    <div class="flex items-center justify-between pb-3 border-b border-white/10">
+      <div class="flex items-center gap-2">
+        <span class="dot done"></span>
+        <b class="text-sm text-white">Koda Customer Support</b>
+      </div>
+      <button class="btn !py-1 !px-2.5 text-xs" id="supClose">Close</button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex gap-2 my-4 border-b border-white/10 pb-2 text-xs">
+      <button class="btn on" id="tabFaqBtn">Quick Help</button>
+      <button class="btn" id="tabAiBtn">AI Assistant</button>
+      <button class="btn" id="tabTicketBtn">Contact Support</button>
+    </div>
+
+    <!-- Tab 1: Quick Help & FAQs -->
+    <div id="supTabFaq" class="space-y-3 text-xs">
+      <div class="p-3.5 rounded-[12px] border border-white/10 bg-white/5">
+        <b class="block text-sm mb-1 text-white">Speech-to-Text Setup</b>
+        <p class="text-[#8e94a0]">Speech-to-text requires accessing via localhost:3000. Grant microphone permissions in your browser settings.</p>
+      </div>
+    </div>
+
+    <!-- Tab 2: AI Support Assistant -->
+    <div id="supTabAi" class="hidden space-y-3 text-xs">
+      <div id="supChatBox" class="p-3 rounded-[12px] border border-white/10 bg-black space-y-2 max-h-56 overflow-auto">
+        <div class="text-[#8e94a0]">Ask any question about using Koda, routing, or synthesis.</div>
+      </div>
+      <div class="flex gap-2">
+        <input type="text" id="supChatInput" placeholder="Ask a support question…" class="!text-xs">
+        <button class="solid-btn !py-1.5 !px-3 text-xs font-semibold" id="supChatSend">Ask</button>
+      </div>
+    </div>
+
+    <!-- Tab 3: Contact Support -->
+    <div id="supTabTicket" class="hidden space-y-3 text-xs">
+      <div>
+        <label class="block text-[#8e94a0] mb-1">Your Name</label>
+        <input type="text" id="tName" placeholder="Full name">
+      </div>
+      <div>
+        <label class="block text-[#8e94a0] mb-1">Your Email</label>
+        <input type="email" id="tEmail" placeholder="name@example.com">
+      </div>
+      <div>
+        <label class="block text-[#8e94a0] mb-1">Issue Description</label>
+        <textarea id="tMsg" rows="3" placeholder="Describe what you need help with…"></textarea>
+      </div>
+      <button class="solid-btn w-full !py-2 text-xs font-bold" id="tSubmit">Send Support Ticket</button>
+      <div id="tStatus" class="text-xs text-center hidden pt-1"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Spotify Control Modal / Drawer -->
+<div id="spotifyModal" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+  <div class="panel p-4 sm:p-6 w-[95vw] max-w-xl overflow-y-auto touch-scroll shadow-2xl relative" style="max-height:90vh;max-height:90dvh;">
+    <div class="flex items-center justify-between pb-3 border-b border-white/10 flex-wrap gap-2">
+      <div class="flex items-center gap-2.5">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="#1db954"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.498 17.306c-.218.358-.684.47-1.042.252-2.855-1.744-6.45-2.14-10.684-1.173-.41.093-.815-.164-.908-.573-.093-.41.164-.816.574-.908 4.637-1.06 8.604-.61 11.808 1.35.358.218.47.684.252 1.052zm1.468-3.26c-.274.446-.86.588-1.306.314-3.268-2.008-8.25-2.59-12.114-1.417-.497.15-1.026-.135-1.176-.632-.15-.497.135-1.026.632-1.176 4.414-1.34 9.907-.692 13.65 1.605.446.274.588.86.314 1.306zm.135-3.394c-3.92-2.328-10.38-2.543-14.135-1.403-.6.182-1.24-.163-1.422-.763-.182-.6.163-1.24.763-1.422 4.314-1.31 11.443-1.06 15.932 1.604.54.32.716 1.022.396 1.562-.32.54-1.022.716-1.562.396z"/></svg>
+        <b class="text-base text-white">Spotify Controls</b>
+        <span class="text-xs font-mono px-2.5 py-0.5 rounded-[10px] bg-white/10 text-white" id="spotifyActiveLabel">Background Music</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <button type="button" id="spotifySizeToggle" class="btn !py-1 !px-2.5 text-xs">Expand View</button>
+        <button type="button" id="spotifyExternalBtn" class="btn !py-1 !px-2.5 text-xs">Open in App</button>
+        <button type="button" id="spotifyMinimizeBtn" class="btn !py-1 !px-2.5 text-xs" title="Minimize to Corner Pill">Minimize</button>
+        <button type="button" id="spotifyCloseBtn" class="btn !py-1 !px-2.5 text-xs" title="Close Panel">✕</button>
+      </div>
+    </div>
+
+    <!-- Curated Focus & Flow Presets (Strictly No Emojis) -->
+    <div class="mt-4">
+      <div class="text-xs text-[#8e94a0] mb-2 font-mono">Curated Flow Presets:</div>
+      <div class="flex flex-wrap gap-2 text-xs" id="spotifyModalPresets">
+        <button type="button" class="btn !py-1.5 !px-3 text-xs sp-preset on" data-uri="playlist/4mEolujDpYfQbVfyPbDjpw" data-name="Background Music">Background Music</button>
+        <button type="button" class="btn !py-1.5 !px-3 text-xs sp-preset" data-uri="playlist/37i9dQZF1DXcBWIGoYBM5M" data-name="Lofi Study">Lofi Study</button>
+        <button type="button" class="btn !py-1.5 !px-3 text-xs sp-preset" data-uri="playlist/37i9dQZF1DWZeKCadgRdKQ" data-name="Deep Focus">Deep Focus</button>
+        <button type="button" class="btn !py-1.5 !px-3 text-xs sp-preset" data-uri="playlist/37i9dQZF1DXdLEN7aqioXM" data-name="Synthwave">Synthwave</button>
+        <button type="button" class="btn !py-1.5 !px-3 text-xs sp-preset" data-uri="playlist/37i9dQZF1DX4t95PaoR1T0" data-name="Chill Beats">Chill Beats</button>
+        <button type="button" class="btn !py-1.5 !px-3 text-xs sp-preset" data-uri="playlist/37i9dQZF1DX3Ogo9pFvBkY" data-name="Ambient Isolation">Ambient Isolation</button>
+        <button type="button" class="btn !py-1.5 !px-3 text-xs sp-preset" data-uri="playlist/37i9dQZF1DX2Nc3B70tvx0" data-name="Coding Flow">Coding Flow</button>
+        <button type="button" class="btn !py-1.5 !px-3 text-xs sp-preset" data-uri="playlist/37i9dQZF1DWVFeELeFFMdo" data-name="Classical Focus">Classical Focus</button>
+      </div>
+    </div>
+
+    <!-- Custom URL Input -->
+    <div class="mt-4">
+      <div class="text-xs text-[#8e94a0] mb-1.5 font-mono">Custom Spotify Link or URI:</div>
+      <div class="flex items-center gap-2">
+        <input type="text" id="spotifyCustomUrl" placeholder="open.spotify.com/playlist/... or spotify:track:..." class="flex-1 text-xs font-mono !py-2 !px-3 rounded-[10px] bg-transparent border border-white/20 text-white placeholder-[#646a78]">
+        <button type="button" id="spotifyLoadUrlBtn" class="solid-btn !py-2 !px-4 text-xs font-bold whitespace-nowrap">Load Music</button>
+      </div>
+    </div>
+
+    <!-- Persistent Embed Host inside Modal -->
+    <div class="mt-4 overflow-hidden rounded-[12px] border border-white/10" id="spotifyModalEmbedSlot">
+      <div id="spotifyEmbedHost" class="w-full">
+        <iframe id="spotifyIframe" style="border-radius:12px;display:block" src="https://open.spotify.com/embed/playlist/4mEolujDpYfQbVfyPbDjpw?utm_source=generator&theme=0&pt=2e74bb711395907d9560c221c11f56c5" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- iOS Install Modal -->
+<div id="iosModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+  <div class="panel p-5 sm:p-6 w-[95vw] max-w-md shadow-2xl relative">
+    <div class="flex items-center justify-between pb-3 border-b border-white/10">
+      <div class="flex items-center gap-2">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.37c.63-.76 1.05-1.82.93-2.88-.91.04-2.02.61-2.67 1.37-.58.67-1.09 1.75-.95 2.79 1.02.08 2.06-.52 2.69-1.28z"/></svg>
+        <b class="text-sm text-white">Install Koda on iPhone / iPad</b>
+      </div>
+      <button class="btn !py-1 !px-2.5 text-xs" onclick="closeIosModal()">&times;</button>
+    </div>
+
+    <div class="space-y-4 my-4 text-xs">
+      <!-- Method 1: Instant iOS WebClip Profile -->
+      <div class="p-3.5 rounded-[12px] border border-white/10 bg-white/5">
+        <div class="flex items-center justify-between mb-1.5">
+          <b class="text-white text-sm">Method 1: Apple WebClip Profile</b>
+          <span class="text-[10px] font-mono px-2 py-0.5 rounded-[10px] bg-white/20 text-white font-semibold">Recommended</span>
+        </div>
+        <p class="text-[#8e94a0] mb-3 leading-relaxed">Installs Koda directly onto your iPhone Home Screen with custom icon and borderless standalone app window.</p>
+        <a href="/koda.mobileconfig" class="solid-btn w-full !py-2 text-center text-xs font-bold block" download="koda.mobileconfig">
+          1. Download iOS Profile
+        </a>
+        <div class="text-[11px] text-[#8e94a0] mt-2 leading-relaxed">
+          <b>Next:</b> Tap <i>Allow</i> &rarr; Open iOS <i>Settings</i> &rarr; Tap <i>Profile Downloaded</i> &rarr; Tap <i>Install</i>.
+        </div>
+      </div>
+
+      <!-- Method 2: Safari Add to Home Screen -->
+      <div class="p-3.5 rounded-[12px] border border-white/10 bg-white/5">
+        <b class="text-white text-sm block mb-1.5">Method 2: Safari Add to Home Screen</b>
+        <p class="text-[#8e94a0] mb-2 leading-relaxed">If you prefer not installing a profile:</p>
+        <ol class="list-decimal pl-4 space-y-1 text-[#8e94a0] leading-relaxed">
+          <li>Tap the <b>Share icon</b> (square with arrow up) at the bottom of Safari.</li>
+          <li>Scroll down and tap <b>Add to Home Screen</b>.</li>
+          <li>Tap <b>Add</b> in the top right.</li>
+        </ol>
+      </div>
+
+      <!-- Method 3: Xcode Project -->
+      <div class="p-3 rounded-[12px] border border-white/10 bg-black/40 flex items-center justify-between">
+        <div>
+          <div class="font-medium text-white">Native Swift / Xcode Project</div>
+          <div class="text-[11px] text-[#8e94a0]">For Mac developers compiling with Xcode</div>
+        </div>
+        <a href="/koda-ios-project.zip" download class="btn !py-1 !px-2.5 text-xs text-white">Download Zip</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- macOS Install Modal -->
+<div id="macModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+  <div class="panel p-5 sm:p-6 w-[95vw] max-w-md shadow-2xl relative">
+    <div class="flex items-center justify-between pb-3 border-b border-white/10">
+      <div class="flex items-center gap-2">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.37c.63-.76 1.05-1.82.93-2.88-.91.04-2.02.61-2.67 1.37-.58.67-1.09 1.75-.95 2.79 1.02.08 2.06-.52 2.69-1.28z"/></svg>
+        <b class="text-sm text-white">Install Koda on Mac (macOS)</b>
+      </div>
+      <button class="btn !py-1 !px-2.5 text-xs" onclick="closeMacModal()">&times;</button>
+    </div>
+
+    <div class="space-y-4 my-4 text-xs">
+      <!-- Method 1: Safari Add to Dock (macOS Sonoma / Sequoia) -->
+      <div class="p-3.5 rounded-[12px] border border-white/10 bg-white/5">
+        <div class="flex items-center justify-between mb-1.5">
+          <b class="text-white text-sm">Method 1: Safari &ldquo;Add to Dock&rdquo;</b>
+          <span class="text-[10px] font-mono px-2 py-0.5 rounded-[10px] bg-white/20 text-white font-semibold">Recommended</span>
+        </div>
+        <p class="text-[#8e94a0] mb-2 leading-relaxed">Runs Koda as a native borderless macOS desktop app with Dock icon, menu bar, and window controls:</p>
+        <ol class="list-decimal pl-4 space-y-1 text-[#8e94a0] leading-relaxed">
+          <li>In Safari on your Mac, click <b>File</b> in the top menu bar (or the <b>Share</b> button).</li>
+          <li>Select <b>Add to Dock...</b></li>
+          <li>Click <b>Add</b>. Koda will appear immediately in your macOS Dock &amp; Launchpad!</li>
+        </ol>
+      </div>
+
+      <!-- Method 2: Download macOS Desktop App Bundle -->
+      <div class="p-3.5 rounded-[12px] border border-white/10 bg-white/5">
+        <b class="text-white text-sm block mb-1.5">Method 2: Standalone macOS Bundle (ZIP)</b>
+        <p class="text-[#8e94a0] mb-3 leading-relaxed">Includes <b>Koda.app</b>, double-clickable <b>koda-mac.command</b>, and background LaunchAgent service scripts:</p>
+        <a href="/koda-mac.zip" class="solid-btn w-full !py-2 text-center text-xs font-bold block" download="koda-mac.zip">
+          Download koda-mac.zip
+        </a>
+        <div class="text-[11px] text-[#8e94a0] mt-2 leading-relaxed">
+          <b>How to run:</b> Unzip and double-click <code>koda-mac.command</code> or <code>Koda.app</code> in Finder.
+        </div>
+      </div>
+
+      <!-- Method 3: 24/7 macOS LaunchAgent Service -->
+      <div class="p-3 rounded-[12px] border border-white/10 bg-black/40">
+        <div class="font-medium text-white mb-1">Method 3: 24/7 Background Service</div>
+        <div class="text-[11px] text-[#8e94a0] leading-relaxed mb-2">Runs Koda continuously on boot via macOS <code>launchd</code>:</div>
+        <pre class="bg-white/5 p-2 rounded text-[11px] font-mono text-white overflow-x-auto select-all">./install-mac-service.sh</pre>
+      </div>
+    </div>
+
+    <div class="text-[11px] text-center text-[#8e94a0]">
+      Supports macOS Sequoia, Sonoma, Ventura, Monterey &amp; Apple Silicon (M1/M2/M3/M4) + Intel Macs.
+    </div>
+  </div>
+</div>
+
+<!-- Android Install Modal -->
+<div id="androidModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+  <div class="panel p-5 sm:p-6 w-[95vw] max-w-md shadow-2xl relative">
+    <div class="flex items-center justify-between pb-3 border-b border-white/10">
+      <div class="flex items-center gap-2">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.551 0 .9993.4482.9993.9993.0001.5511-.4482.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993 0 .5511-.4482.9997-.9993.9997m11.4045-6.02l1.9973-3.4592a.416.416 0 00-.1521-.5676.416.416 0 00-.5676.1521l-2.0223 3.503C15.5902 8.4116 13.8533 8.125 12 8.125s-3.5902.2866-5.1368.8247L4.8409 5.4467a.4161.4161 0 00-.5677-.1521.4157.4157 0 00-.1521.5676l1.9973 3.4592C2.6889 11.1867.3432 14.6589 0 18.7842h24c-.3432-4.1253-2.6889-7.5975-6.1185-9.4628"/></svg>
+        <b class="text-sm text-white">Install Koda on Android</b>
+      </div>
+      <button class="btn !py-1 !px-2.5 text-xs" onclick="closeAndroidModal()">&times;</button>
+    </div>
+
+    <div class="space-y-4 my-4 text-xs">
+      <!-- Direct 1-Click Native Install -->
+      <div class="p-4 rounded-[14px] border border-white/20 bg-white/[0.06] text-center space-y-3">
+        <div class="w-12 h-12 mx-auto rounded-[12px] bg-black border border-white/20 flex items-center justify-center shadow-lg">
+          <img src="icon-192.png" alt="Koda" class="w-9 h-9 rounded-[8px]">
+        </div>
+        <div>
+          <b class="text-white text-sm block">Direct Website Install</b>
+          <p class="text-[#8e94a0] text-xs mt-1">Installs Koda directly to your Android home screen and app drawer with custom icon, splash screen, zero browser address bar, and offline support.</p>
+        </div>
+        <button id="androidDirectInstallBtn" class="solid-btn w-full !py-2.5 text-center text-xs font-bold block" onclick="triggerAndroidPwaInstall()">
+          ⚡ Install App Directly
+        </button>
+      </div>
+
+      <!-- Quick 1-Step Browser Guide (If browser blocks auto-prompt) -->
+      <div class="p-3.5 rounded-[12px] border border-white/10 bg-white/5 space-y-2">
+        <b class="text-white text-xs block">If your browser doesn't prompt automatically:</b>
+        <ol class="list-decimal pl-4 space-y-1.5 text-[#8e94a0] text-[11px] leading-relaxed">
+          <li>In <b>Chrome</b>, <b>Samsung Internet</b>, or <b>Edge</b>, tap the <b>three dots (⋮)</b> in the top right.</li>
+          <li>Tap <b>Install app</b> (or <b>Add to Home screen</b>).</li>
+          <li>Tap <b>Install</b>. Koda will appear immediately in your phone apps!</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="text-[11px] text-center text-[#8e94a0]">
+      Installs as an official standalone Android WebAPK application.
+    </div>
+  </div>
+</div>
+
+<!-- Floating Spotify Mini Pill (Persistent Corner Access) -->
+<div id="spotifyFloatingPill" class="hidden fixed bottom-5 right-5 z-40 flex items-center gap-3 panel !p-2 !px-3 shadow-2xl border border-white/20 text-xs backdrop-blur-md">
+  <div class="flex items-center gap-2 cursor-pointer" id="spotifyPillExpand" title="Expand Spotify Control Panel">
+    <span class="w-2 h-2 rounded-full bg-[#1db954] animate-pulse"></span>
+    <svg viewBox="0 0 24 24" width="14" height="14" fill="#1db954"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.498 17.306c-.218.358-.684.47-1.042.252-2.855-1.744-6.45-2.14-10.684-1.173-.41.093-.815-.164-.908-.573-.093-.41.164-.816.574-.908 4.637-1.06 8.604-.61 11.808 1.35.358.218.47.684.252 1.052zm1.468-3.26c-.274.446-.86.588-1.306.314-3.268-2.008-8.25-2.59-12.114-1.417-.497.15-1.026-.135-1.176-.632-.15-.497.135-1.026.632-1.176 4.414-1.34 9.907-.692 13.65 1.605.446.274.588.86.314 1.306zm.135-3.394c-3.92-2.328-10.38-2.543-14.135-1.403-.6.182-1.24-.163-1.422-.763-.182-.6.163-1.24.763-1.422 4.314-1.31 11.443-1.06 15.932 1.604.54.32.716 1.022.396 1.562-.32.54-1.022.716-1.562.396z"/></svg>
+    <span class="font-medium text-white truncate max-w-[140px]" id="spotifyPillTitle">Background Music</span>
+  </div>
+  <button type="button" id="spotifyPillClose" class="text-[#8e94a0] hover:text-white text-xs px-1 cursor-pointer" title="Hide mini player">✕</button>
+</div>
+
+<script>
+const $=s=>document.querySelector(s), ls=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}}, sv=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}};
+
+/* Auth Nav State */
+function renderIndexAuth() {
+  try {
+    const raw = localStorage.getItem('koda_user') || localStorage.getItem('hub_user');
+    const authLink = document.getElementById('navAuthLink');
+    const authText = document.getElementById('navAuthText');
+    if (!authLink || !authText) return;
+    if (raw) {
+      const u = JSON.parse(raw);
+      authText.textContent = u.name || (u.email ? u.email.split('@')[0] : 'Profile');
+      authLink.href = 'profile.html';
+      authLink.title = 'View Profile & Accounts (' + (u.email || u.name || 'Logged in') + ')';
+    } else {
+      authText.textContent = 'Sign in';
+      authLink.href = 'login.html';
+      authLink.title = 'Sign in to your Koda account';
+    }
+  } catch (_) {}
+}
+window.addEventListener('DOMContentLoaded', renderIndexAuth);
+renderIndexAuth();
+
+/* Platform Detection (macOS, iOS, Android, Windows, Linux) */
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const isMac = !isIOS && (navigator.platform.toUpperCase().indexOf('MAC') >= 0 || /Macintosh|MacIntel|MacPPC|Mac68K/.test(navigator.userAgent));
+const isAndroid = /Android/i.test(navigator.userAgent);
+
+function openMacModal() {
+  const m = $('#macModal');
+  if (m) { m.classList.remove('hidden'); lockBodyScroll(true); }
+}
+
+function closeMacModal() {
+  const m = $('#macModal');
+  if (m) { m.classList.add('hidden'); lockBodyScroll(false); }
+}
+
+function openAndroidModal() {
+  const m = $('#androidModal');
+  if (m) { m.classList.remove('hidden'); lockBodyScroll(true); }
+}
+
+function closeAndroidModal() {
+  const m = $('#androidModal');
+  if (m) { m.classList.add('hidden'); lockBodyScroll(false); }
+}
+
+function getBestAudioMime() {
+  const candidates = [
+    'audio/webm;codecs=opus',
+    'audio/webm',
+    'audio/mp4',
+    'audio/aac',
+    'audio/wav'
+  ];
+  if (window.MediaRecorder && typeof MediaRecorder.isTypeSupported === 'function') {
+    for (const t of candidates) {
+      if (MediaRecorder.isTypeSupported(t)) return t;
+    }
+  }
+  return isIOS ? 'audio/mp4' : 'audio/webm';
+}
+
+function lockBodyScroll(lock) {
+  if (lock) {
+    document.body.classList.add('modal-open');
+  } else {
+    document.body.classList.remove('modal-open');
+  }
+}
+
+function initIosViewportHandling() {
+  if (!window.visualViewport) return;
+  const pPanel = document.getElementById('promptPanel');
+  if (!pPanel) return;
+
+  const onViewport = () => {
+    const vp = window.visualViewport;
+    const kbHeight = Math.max(0, window.innerHeight - (vp.offsetTop + vp.height));
+    if (kbHeight > 40) {
+      pPanel.style.transform = `translateY(-${kbHeight}px)`;
+    } else {
+      pPanel.style.transform = '';
+    }
+  };
+
+  window.visualViewport.addEventListener('resize', onViewport);
+  window.visualViewport.addEventListener('scroll', onViewport);
+
+  const q = document.getElementById('q');
+  if (q) {
+    q.addEventListener('focus', () => {
+      setTimeout(() => {
+        pPanel.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      }, 260);
+    });
+  }
+}
+
+function initHeroAndTheme() {
+  // Theme & Appearance management is orchestrated by /theme-manager.js
+  if (typeof dReject !== 'undefined' && dReject) dReject.style.background = 'transparent';
+  if (typeof dApprove !== 'undefined' && dApprove) dApprove.style.opacity = '1';
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initHeroAndTheme);
+} else {
+  initHeroAndTheme();
+}
+
+const P={
+  koda:{n:'Koda',c:'#ffffff',m:'gemini-3.1-flash-lite',alt:'gemini-3.1-flash-lite-preview',u:'koda',k:'gem',cls:'koda'},
+  openai:{n:'ChatGPT',c:'#ffffff',m:'gpt-4o',alt:'gpt-4o-mini',u:'https://api.openai.com/v1/chat/completions',k:'oai'},
+  anthropic:{n:'Claude',c:'#cfcfcf',m:'claude-sonnet-5-5',u:'https://api.anthropic.com/v1/messages',k:'ant'},
+  gemini:{n:'Gemini',c:'#a0a0a0',m:'gemini-3.1-flash-lite',alt:'gemini-3.1-flash-lite-preview',u:'https://generativelanguage.googleapis.com/v1beta/models/',k:'gem',cls:'gem'},
+  perplexity:{n:'Perplexity',c:'#e6e6e6',m:'sonar-pro',u:'https://api.perplexity.ai/chat/completions',k:'ppx'},
+  deepseek:{n:'DeepSeek',c:'#b3b3b3',m:'deepseek-chat',alt:'deepseek-reasoner',u:'https://api.deepseek.com/chat/completions',k:'dsk'}
+};
+const IDS=Object.keys(P);
+const S={on:ls('hub_on',Object.fromEntries(IDS.map(i=>[i,true]))),view:ls('hub_view','3'),tab:ls('hub_tab','koda'),lead:ls('hub_lead','koda'),
+  keys:ls('hub_keys',{}),models:ls('hub_models',{}),routes:ls('hub_routes',{}),hist:ls('hub_hist',[]),cur:null,ctl:{},vaultAvailable:[]};
+delete S.on.groq; delete S.keys.groq; delete S.models.groq; delete S.routes.groq;
+IDS.forEach(i=>{if(S.on[i]===undefined)S.on[i]=true;if(!S.routes[i]||S.routes[i]==='groq'||S.routes[i]==='direct')S.routes[i]='gemini'});
+// Guaranteed Koda AI persistence on reload/refresh:
+S.on['koda'] = true;
+S.lead = 'koda';
+if (S.tab !== 'spotify') S.tab = 'koda';
+sv('hub_on',S.on); sv('hub_lead',S.lead); sv('hub_tab',S.tab); sv('hub_routes',S.routes);
+const GMAP={koda:'gemini-3.1-flash-lite',openai:'gemini-3.1-flash-lite',anthropic:'gemini-3.1-flash-lite-preview',perplexity:'gemini-3.1-flash-lite-preview',deepseek:'gemini-3-flash-preview',gemini:'gemini-3.1-flash-lite'};
+const NMAP={koda:'nvidia/llama-3.1-nemotron-70b-instruct',openai:'nvidia/llama-3.1-nemotron-70b-instruct',anthropic:'mistralai/mistral-large-2-instruct',gemini:'google/gemma-3-12b-it',perplexity:'nvidia/mistral-nemo-minitron-8b-8k-instruct',deepseek:'deepseek-ai/deepseek-v4.1-flash'};
+const CONFIGS={
+  koda:{temperature:0.7,topP:0.95},
+  openai:{temperature:0.85,topP:0.95},
+  anthropic:{temperature:0.65,topP:0.90},
+  gemini:{temperature:1.0,topP:0.98},
+  perplexity:{temperature:0.25,topP:0.75},
+  deepseek:{temperature:0.55,topP:0.85}
+};
+const PERSONAS={
+  koda:`You are Koda, a precise, analytical, and structured intelligence.
+Your perspective: Direct, high-signal, deeply analytical, and objective.
+- Deliver decisive, structured answers with zero conversational filler or fluff.
+- Provide verified, production-grade code and concise reasoning.
+- Format with crisp headings, clean code blocks, and structured lists.`,
+  openai:`You are ChatGPT, developed by OpenAI.
+Your distinct perspective: Practical, conversational, and user-centric.
+How you must format and present your answer:
+- Explain ideas clearly with relatable real-world analogies and everyday examples.
+- Use readable headings, conversational explanations, and actionable bullet points.
+- Offer balanced, practical takeaways that the user can immediately understand or apply.
+- Identity: You are ChatGPT by OpenAI. Never state that you are Gemini or created by Google.`,
+
+  anthropic:`You are Claude, created by Anthropic.
+Your distinct perspective: Highly thoughtful, nuanced, philosophical, and intellectually deep.
+How you must format and present your answer:
+- Write in rich, articulate, well-structured prose that explores the "why", underlying principles, and subtle trade-offs.
+- Address counter-perspectives, edge cases, and systemic or ethical considerations.
+- Avoid generic listicles where thoughtful paragraphs explain the nuance much better.
+- Identity: You are Claude by Anthropic. Never state that you are Gemini or created by Google.`,
+
+  gemini:`You are Gemini, developed by Google.
+Your distinct perspective: Creative, dynamic, modern, and forward-looking.
+How you must format and present your answer:
+- Provide fresh, innovative angles, connecting concepts to emerging tech, future trends, and modern tools.
+- Highlight creative possibilities, collaborative ideas, and multidimensional solutions.
+- Be vibrant, engaging, and inspiring in tone.
+- Identity: You are Gemini by Google.`,
+
+  perplexity:`You are Perplexity, an AI answer and research engine by Perplexity AI.
+Your distinct perspective: Fast, concise, fact-dense, and research-oriented like an executive briefing.
+How you must format and present your answer:
+- Begin IMMEDIATELY with a direct, single-sentence bottom-line answer. Do not use conversational filler, greetings, or preamble.
+- Follow with concise, high-density bullet points featuring verified facts, data, statistics, key entities, or core definitions.
+- Keep the entire output brief, structured, and factual.
+- Identity: You are Perplexity by Perplexity AI. Never state that you are Gemini or created by Google.`,
+
+  deepseek:`You are DeepSeek, an AI model developed by DeepSeek.
+Your distinct perspective: Deep technical rigor, algorithmic logic, engineering breakdown, and first-principles reasoning.
+How you must format and present your answer:
+- Analyze the problem from an engineering, architectural, mathematical, or code-level perspective.
+- Break down the underlying mechanisms step-by-step with technical precision, performance implications, and trade-offs.
+- Be straightforward, highly structured, and technically thorough without unnecessary fluff.
+- Identity: You are DeepSeek by DeepSeek. Never state that you are Gemini or created by Google.`
+};
+const routeOf=id=>S.routes?.[id]||'gemini';
+const shown=id=>'';
+const model=id=>S.models[id]||P[id].m, key=id=>(S.keys[id]||'').replace(/[\s"']/g,'');
+const md=t=>{try{return DOMPurify.sanitize(marked.parse(t||''))}catch{return (t||'').replace(/</g,'&lt;').replace(/\n/g,'<br>')}};
+
+/* ---------- Modern In-App Toast (Replaces blocking modal alerts) ---------- */
+function showToast(msg) {
+  if (!msg) return;
+  const cleanMsg = String(msg).replace(/^Bridge notice:\s*/i, '').trim();
+  if (!cleanMsg || /not valid json/i.test(cleanMsg) || /unexpected token/i.test(cleanMsg)) return;
+  let t = document.getElementById('kodaToast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'kodaToast';
+    t.className = 'fixed bottom-24 left-1/2 -translate-x-1/2 z-[9999] px-4 py-2 bg-[#12141a]/95 text-white text-xs border border-white/20 rounded-full shadow-2xl backdrop-blur transition-all duration-300 pointer-events-none opacity-0 select-none max-w-[90vw] text-center leading-relaxed';
+    document.body.appendChild(t);
+  }
+  t.textContent = cleanMsg;
+  t.style.opacity = '1';
+  t.style.transform = 'translate(-50%, 0) scale(1)';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => {
+    if (t) {
+      t.style.opacity = '0';
+      t.style.transform = 'translate(-50%, 8px) scale(0.98)';
+    }
+  }, 2800);
+}
+window.alert = showToast;
+
+/* ---------- Streaming ---------- */
+async function readSSE(res,onData,signal){
+  let reader=null;
+  const cancelReader=()=>{try{if(reader)reader.cancel()}catch(_){}};
+  if(signal){
+    if(signal.aborted){cancelReader();return}
+    signal.addEventListener('abort',cancelReader,{once:true});
+  }
+  const handle=line=>{
+    line=line.trim();
+    if(line.startsWith('data:')){
+      const v=line.slice(5).trim();
+      if(v&&v!=='[DONE]'){
+        try{onData(JSON.parse(v))}catch(e){if(e&&e.isFatal)throw e}
+      }
+    } else if(line.startsWith('{') && line.endsWith('}')){
+      try{onData(JSON.parse(line))}catch(_){}
+    }
+  };
+  try{
+    if(!res.body||!res.body.getReader){(await res.text()).split('\n').forEach(handle);return}
+    reader=res.body.getReader();const d=new TextDecoder();let buf='';
+    for(;;){
+      if(signal&&signal.aborted)break;
+      const {done,value}=await reader.read();
+      if(done)break;
+      buf+=d.decode(value,{stream:true});
+      let i;
+      while((i=buf.indexOf('\n'))>=0){
+        handle(buf.slice(0,i));
+        buf=buf.slice(i+1);
+      }
+    }
+    if(buf)handle(buf);
+  }catch(err){
+    if(err&&err.name==='AbortError')return;
+    throw err;
+  }finally{
+    if(signal)signal.removeEventListener('abort',cancelReader);
+    try{if(reader)reader.releaseLock()}catch(_){}
+  }
+}
+async function errOf(res){let t='';try{t=await res.text();const j=JSON.parse(t);t=j.error?.message||j.error||t}catch{}return `HTTP ${res.status}: ${String(t).slice(0,300)}`}
+async function callModel(id,prompt,onTok,signal){
+  if (window.vaultPromise && (!S.vaultAvailable || !S.vaultAvailable.length)) {
+    try { await window.vaultPromise; } catch (_) {}
+  }
+
+  // ChatGPT Direct Mirror Bridge (Mirrors directly to personal ChatGPT account with NO API key)
+  if (id === 'openai') {
+    const oaiKey = key('openai');
+    const preferApi = !!(oaiKey && S.routes && S.routes.openai === 'api');
+    if (!preferApi && location.protocol.startsWith('http')) {
+      let textContent = (typeof prompt === 'object' && prompt.text !== undefined) ? prompt.text : String(prompt || '');
+      const atts = (typeof prompt === 'object' && prompt.attachments) ? prompt.attachments : [];
+      if (atts.length) {
+        textContent += `\n\n[Attached files: ${atts.map(a => `${a.name} (${a.kind})`).join(', ')}]`;
+      }
+
+      let out = '';
+      const add = t => { if (t) { out += t; onTok(out); } };
+      let mirrorOk = false;
+      const internalAbort = new AbortController();
+      if (signal) {
+        signal.addEventListener('abort', () => internalAbort.abort());
+      }
+      const stallTimer = setTimeout(() => {
+        if (!out) internalAbort.abort();
+      }, 30000);
+
+      try {
+        let res = await fetch('/api/chatgpt/mirror/send', {
+          method: 'POST',
+          signal: internalAbort.signal,
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            prompt: textContent,
+            conversationId: window.__kodaCurChatGPTConvId || null
+          })
+        });
+
+        if (res.ok) {
+          await readSSE(res, j => {
+            if (j.error) {
+              const errMsg = typeof j.error === 'object' ? (j.error.message || JSON.stringify(j.error)) : String(j.error);
+              add(`⚠️ ChatGPT Notice: ${errMsg}`);
+              return;
+            }
+            const delta = (typeof j.delta === 'string' ? j.delta : (j.choices?.[0]?.delta?.content || ''));
+            if (delta) {
+              add(delta);
+            } else if (typeof j.fullText === 'string') {
+              out = j.fullText;
+              onTok(out);
+            } else if (typeof j.text === 'string' && !j.delta) {
+              out = j.text;
+              onTok(out);
+            }
+            if (j.conversationUrl) {
+              const match = j.conversationUrl.match(/\/c\/([a-f0-9-]+)/i);
+              if (match) window.__kodaCurChatGPTConvId = match[1];
+            }
+          }, internalAbort.signal);
+          if (out) mirrorOk = true;
+        }
+      } catch (mirrorErr) {
+        out = '';
+      } finally {
+        clearTimeout(stallTimer);
+      }
+
+      if (mirrorOk && out) {
+        return out;
+      }
+    }
+  }
+
+  // Universal Personal Web Mirror Bridge (Gemini, Perplexity, DeepSeek - No API keys required)
+  if (['gemini', 'perplexity', 'deepseek'].includes(id)) {
+    const customKey = key(id);
+    const preferApi = !!(customKey && S.routes && S.routes[id] === 'api');
+    if (!preferApi && location.protocol.startsWith('http')) {
+      let textContent = (typeof prompt === 'object' && prompt.text !== undefined) ? prompt.text : String(prompt || '');
+      const atts = (typeof prompt === 'object' && prompt.attachments) ? prompt.attachments : [];
+      if (atts.length) {
+        textContent += `\n\n[Attached files: ${atts.map(a => `${a.name} (${a.kind})`).join(', ')}]`;
+      }
+
+      let out = '';
+      const add = t => { if (t) { out += t; onTok(out); } };
+      let mirrorOk = false;
+      const internalAbort = new AbortController();
+      if (signal) {
+        signal.addEventListener('abort', () => internalAbort.abort());
+      }
+      const stallTimer = setTimeout(() => {
+        if (!out) internalAbort.abort();
+      }, 30000);
+
+      try {
+        let res = await fetch(`/api/${id}/mirror/send`, {
+          method: 'POST',
+          signal: internalAbort.signal,
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            prompt: textContent
+          })
+        });
+
+        if (res.ok) {
+          await readSSE(res, j => {
+            if (j.error) {
+              const errMsg = typeof j.error === 'object' ? (j.error.message || JSON.stringify(j.error)) : String(j.error);
+              add(`⚠️ ${P[id]?.n || id} Notice: ${errMsg}`);
+              return;
+            }
+            const delta = (typeof j.delta === 'string' ? j.delta : (j.choices?.[0]?.delta?.content || j.candidates?.[0]?.content?.parts?.map(p => p.text).join('') || ''));
+            if (delta) {
+              add(delta);
+            } else if (typeof j.fullText === 'string') {
+              out = j.fullText;
+              onTok(out);
+            } else if (typeof j.text === 'string' && !j.delta) {
+              out = j.text;
+              onTok(out);
+            }
+          }, internalAbort.signal);
+          if (out) mirrorOk = true;
+        }
+      } catch (mirrorErr) {
+        out = '';
+      } finally {
+        clearTimeout(stallTimer);
+      }
+
+      if (mirrorOk && out) {
+        return out;
+      }
+    }
+  }
+
+  // Claude Direct Mirror Bridge (Mirrors directly to personal Claude account with NO API key)
+  if (id === 'anthropic') {
+    const antKey = key('anthropic');
+    const preferApi = !!(antKey && S.routes && S.routes.anthropic === 'api');
+    if (!preferApi && location.protocol.startsWith('http')) {
+      let textContent = (typeof prompt === 'object' && prompt.text !== undefined) ? prompt.text : String(prompt || '');
+      const atts = (typeof prompt === 'object' && prompt.attachments) ? prompt.attachments : [];
+      if (atts.length) {
+        textContent += `\n\n[Attached files: ${atts.map(a => `${a.name} (${a.kind})`).join(', ')}]`;
+      }
+
+      let out = '';
+      const add = t => { if (t) { out += t; onTok(out); } };
+      let mirrorOk = false;
+      const internalAbort = new AbortController();
+      if (signal) {
+        signal.addEventListener('abort', () => internalAbort.abort());
+      }
+      const stallTimer = setTimeout(() => {
+        if (!out) internalAbort.abort();
+      }, 30000);
+
+      try {
+        let res = await fetch('/api/claude/mirror/send', {
+          method: 'POST',
+          signal: internalAbort.signal,
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            prompt: textContent
+          })
+        });
+
+        if (res.ok) {
+          await readSSE(res, j => {
+            if (j.error) {
+              const errMsg = typeof j.error === 'object' ? (j.error.message || JSON.stringify(j.error)) : String(j.error);
+              const errTxt = `⚠️ Claude Notice: ${errMsg}`;
+              add(errTxt);
+              return;
+            }
+            const delta = (typeof j.delta === 'string' ? j.delta : (j.choices?.[0]?.delta?.content || ''));
+            if (delta) {
+              add(delta);
+            } else if (typeof j.fullText === 'string') {
+              out = j.fullText;
+              onTok(out);
+            } else if (typeof j.text === 'string' && !j.delta) {
+              out = j.text;
+              onTok(out);
+            }
+          }, internalAbort.signal);
+          if (out) mirrorOk = true;
+        }
+      } catch (mirrorErr) {
+        // If Claude mirror is rate-limited by Anthropic or has an error, smoothly fall back to high-speed server engine
+        out = '';
+      } finally {
+        clearTimeout(stallTimer);
+      }
+
+      if (mirrorOk && out) {
+        return out;
+      }
+    }
+  }
+
+  let r=routeOf(id);
+  let via=id;
+  let m=model(id);
+  if(r==='nvidia'){
+    via='nvidia';
+    m=NMAP[id]||'nvidia/llama-3.1-nemotron-70b-instruct';
+  }else if(r==='gemini' || (!key(id) && (key('gemini') || (S.vaultAvailable && S.vaultAvailable.includes('gemini')) || location.protocol.startsWith('http')))){
+    via='gemini';
+    m=GMAP[id]||'gemini-3.1-flash-lite';
+  }
+  const k=key(via);
+  const hasVaultKey = S.vaultAvailable && (S.vaultAvailable.includes(via) || S.vaultAvailable.includes('gemini'));
+  if(!k && !hasVaultKey && !location.protocol.startsWith('http'))return demo(id,prompt,onTok,signal);
+  let res,out='';const add=t=>{if(t){out+=t;onTok(out)}};
+  const sys=PERSONAS[id]||`You are ${P[id].n}.`;
+  const cfg=CONFIGS[id]||{temperature:0.7,topP:0.9};
+  try{
+    if(via==='anthropic'){
+      const antMsgs = Array.isArray(prompt) ? prompt.map(msg=>({role:msg.role,content:msg.content})) : [{role:'user',content:prompt}];
+      if(hasVaultKey || !k){
+        res = await fetch('/api/proxy/stream', {
+          method: 'POST',
+          signal,
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ id: via, model: m, body: { model: m, max_tokens: 2048, stream: true, temperature: cfg.temperature, system: sys, messages: antMsgs } })
+        });
+      } else {
+        res=await fetch(P[id].u,{method:'POST',signal,headers:{'content-type':'application/json','x-api-key':k,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+          body:JSON.stringify({model:m,max_tokens:2048,stream:true,temperature:cfg.temperature,system:sys,messages:antMsgs})});
+      }
+      if(!res.ok)throw new Error(await errOf(res));
+      await readSSE(res,j=>{if(j.type==='content_block_delta')add(j.delta?.text)});
+    }else if(via==='gemini'){
+      let gemContents;
+      if (Array.isArray(prompt)) {
+        gemContents = prompt.map(msg=>({role:msg.role==='assistant'?'model':'user',parts:[{text:msg.content}]}));
+      } else {
+        const parts = [];
+        const textPrompt = (typeof prompt === 'object' && prompt.text !== undefined) ? prompt.text : String(prompt || '');
+        if (textPrompt) parts.push({ text: textPrompt });
+        const atts = (typeof prompt === 'object' && prompt.attachments) ? prompt.attachments : [];
+        atts.forEach(att => {
+          if (att.base64) {
+            parts.push({
+              inlineData: {
+                mimeType: att.type || 'image/jpeg',
+                data: att.base64
+              }
+            });
+          }
+        });
+        if (!parts.length) parts.push({ text: 'Please analyze the attached content.' });
+        gemContents = [{ role: 'user', parts }];
+      }
+      const gemBody={
+        contents:gemContents,
+        systemInstruction:{parts:[{text:sys}]},
+        generationConfig:{temperature:cfg.temperature,topP:cfg.topP}
+      };
+      const internalAbort = new AbortController();
+      if (signal) signal.addEventListener('abort', () => internalAbort.abort());
+      let gotToken = false;
+      const stallTimer = setTimeout(() => {
+        if (!gotToken) internalAbort.abort();
+      }, 30000);
+
+      const doGeminiFetch = async (targetModel) => {
+        if (hasVaultKey || !k || location.protocol.startsWith('http')) {
+          const sRes = await fetch('/api/proxy/stream', {
+            method: 'POST',
+            signal: internalAbort.signal,
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ id: 'gemini', model: targetModel, body: gemBody })
+          });
+          if (sRes.status !== 401 || !k) return sRes;
+        }
+        return await fetch(`${P[via].u}${targetModel}:streamGenerateContent?alt=sse&key=${encodeURIComponent(k)}`, {
+          method: 'POST',
+          signal: internalAbort.signal,
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(gemBody)
+        });
+      };
+      const candidates = ['gemini-3.1-flash-lite', 'gemini-3.1-flash-lite-preview', 'gemini-3-flash-preview', 'gemma-4-26b-a4b-it'];
+      const tried = new Set();
+      try {
+        for (const curM of candidates) {
+          if (!curM || tried.has(curM)) continue;
+          tried.add(curM);
+          try {
+            res = await doGeminiFetch(curM);
+          } catch (e) {
+            continue;
+          }
+          if (res.ok) break;
+          if (res.status === 503 || res.status === 429) {
+            await new Promise(r => setTimeout(r, 400));
+            if (signal && signal.aborted) throw new DOMException('x', 'AbortError');
+            continue;
+          }
+          break;
+        }
+        if (!res || !res.ok) {
+          if (res && res.status === 429) throw new Error('Free tier rate limit hit. Wait a few moments, or verify your Gemini key in /admin.');
+          if (res && res.status === 503) throw new Error('AI service is currently busy. Please retry in a few moments.');
+          if (res && (res.status === 400 || res.status === 403)) {
+            const t = await errOf(res);
+            throw new Error(/API key|API_KEY|permission|referer/i.test(t) ? 'Gemini API key is invalid or unauthorized. Open /admin to verify the key. (' + t.slice(0, 120) + ')' : t);
+          }
+          if(res && res.status===404)throw new Error('Model "'+m+'" was not found. Configure gemini-3.5-flash in settings.');
+          if(res && !res.ok)throw new Error(await errOf(res));
+        }
+        await readSSE(res, j => {
+          const chunk = j.choices?.[0]?.delta?.content || j.candidates?.[0]?.content?.parts?.map(p=>p.text).join('') || j.delta?.text || j.text || '';
+          if (chunk) {
+            gotToken = true;
+            add(chunk);
+          }
+        }, internalAbort.signal);
+      } finally {
+        clearTimeout(stallTimer);
+      }
+    }else{ // OpenAI-compatible: openai, perplexity, deepseek, nvidia
+      let textContent = (typeof prompt === 'object' && prompt.text !== undefined) ? prompt.text : String(prompt || '');
+      const atts = (typeof prompt === 'object' && prompt.attachments) ? prompt.attachments : [];
+      if (atts.length) {
+        textContent += `\n\n[Attached files: ${atts.map(a => `${a.name} (${a.kind})`).join(', ')}]`;
+      }
+      const msgs = Array.isArray(prompt)
+        ? (sys ? [{role:'system',content:sys}, ...prompt] : prompt)
+        : (sys ? [{role:'system',content:sys},{role:'user',content:textContent}] : [{role:'user',content:textContent}]);
+
+      const internalAbort = new AbortController();
+      if (signal) signal.addEventListener('abort', () => internalAbort.abort());
+      let gotToken = false;
+      const stallTimer = setTimeout(() => {
+        if (!gotToken) internalAbort.abort();
+      }, 30000);
+
+      try {
+        if(hasVaultKey || !k){
+          // Securely call server proxy using Server Vault key
+          res = await fetch('/api/proxy/stream', {
+            method: 'POST',
+            signal: internalAbort.signal,
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ id: via, model: m, body: { model: m, stream: true, temperature: cfg.temperature, top_p: cfg.topP, max_tokens: 2048, messages: msgs } })
+          });
+        } else {
+          const ep = (via==='nvidia') ? 'https://integrate.api.nvidia.com/v1/chat/completions' : P[via].u;
+          const payload = {method:'POST',signal:internalAbort.signal,headers:{'content-type':'application/json',authorization:'Bearer '+k},
+            body:JSON.stringify({model:m,stream:true,temperature:cfg.temperature,top_p:cfg.topP,max_tokens:2048,messages:msgs})};
+          try{
+            res=await fetch(ep,payload);
+          }catch(fetchErr){
+            if(via==='nvidia' && (location.protocol==='http:'||location.protocol==='https:') && location.host){
+              res=await fetch('/api/proxy/nvidia',payload);
+            }else{
+              throw fetchErr;
+            }
+          }
+        }
+        if(!res.ok)throw new Error(await errOf(res));
+        await readSSE(res, j => {
+          const chunk = j.choices?.[0]?.delta?.content || j.candidates?.[0]?.content?.parts?.map(p => p.text).join('') || j.delta?.text || j.text || '';
+          if (chunk) {
+            gotToken = true;
+            add(chunk);
+          }
+        }, internalAbort.signal);
+      } finally {
+        clearTimeout(stallTimer);
+      }
+    }
+  }catch(e){
+    if(e.name==='AbortError')throw e;
+    if(e instanceof TypeError)throw new Error('Network/CORS error: the browser blocked this request. Start the local server (run start-server.bat and open http://localhost:3000) or check your connection.');
+    throw e;
+  }
+  return out;
+}
+async function demo(id,prompt,onTok,signal){
+  const txt=`**Demo mode — no ${P[id].n} key saved.**\n\nAdd a Gemini key under /admin for live answers. Your prompt was:\n\n> ${(typeof prompt==='object'?prompt.text:prompt).slice(0,200)}\n\nThis simulated stream shows how markdown renders in real time:\n\n- bullet one\n- bullet two\n\n\`\`\`js\nconsole.log("hello from ${P[id].n}")\n\`\`\``;
+  let o='';for(const w of (txt.match(/\S+\s*/g)||[])){if(signal?.aborted)throw new DOMException('x','AbortError');o+=w;onTok(o);await new Promise(r=>setTimeout(r,25+Math.random()*30))}
+  return o;
+}
+
+/* ---------- Attachments Management (Photos, Videos, Documents, Recordings) ---------- */
+let S_attachments = [];
+
+function formatBytes(bytes) {
+  if (!bytes || bytes === 0) return '0 B';
+  const k = 1024, dm = 1, sizes = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+}
+
+function escapeHtml(s) {
+  return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function readFileAsBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const res = reader.result;
+      const base64 = typeof res === 'string' ? res.split(',')[1] : '';
+      resolve(base64);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function renderAttachments() {
+  const tray = $('#attachTray');
+  if (!tray) return;
+  if (!S_attachments.length) {
+    tray.classList.add('hidden');
+    tray.innerHTML = '';
+    return;
+  }
+  tray.classList.remove('hidden');
+  tray.innerHTML = S_attachments.map((att, idx) => {
+    let previewEl = '';
+    if (att.kind === 'photo' && att.dataUrl) {
+      previewEl = `<img src="${att.dataUrl}" class="w-7 h-7 rounded object-cover border border-white/20 flex-shrink-0">`;
+    } else if (att.kind === 'video') {
+      previewEl = `<div class="w-7 h-7 rounded bg-white/10 flex items-center justify-center flex-shrink-0"><svg class="w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="15" height="16" rx="2"/><polygon points="23 7 17 12 23 17 23 7"/></svg></div>`;
+    } else if (att.kind === 'recording' || att.kind === 'audio') {
+      previewEl = `<div class="w-7 h-7 rounded bg-white/10 flex items-center justify-center flex-shrink-0"><svg class="w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>`;
+    } else {
+      previewEl = `<div class="w-7 h-7 rounded bg-white/10 flex items-center justify-center flex-shrink-0"><svg class="w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>`;
+    }
+
+    return `
+      <div class="attach-chip flex items-center gap-2 p-1.5 pl-2 pr-2 rounded-[10px] bg-black border border-white/20 text-xs">
+        ${previewEl}
+        <div class="max-w-[130px] sm:max-w-[170px] truncate">
+          <div class="chip-name font-medium text-white truncate text-[11px]">${escapeHtml(att.name)}</div>
+          <div class="chip-sub text-[10px] text-[#8e94a0] font-mono">${formatBytes(att.size)} • ${att.kind}</div>
+        </div>
+        <button type="button" class="btn !p-1 !h-auto text-[#8e94a0] hover:text-white" onclick="removeAttachment(${idx})" title="Remove attachment">
+          <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    `;
+  }).join('') + (S_attachments.length > 1 ? `<button type="button" class="btn !py-1 !px-2 text-[10px] text-[#8e94a0] hover:text-white" onclick="clearAllAttachments()">Clear all (${S_attachments.length})</button>` : '');
+}
+
+window.removeAttachment = function(idx) {
+  S_attachments.splice(idx, 1);
+  renderAttachments();
+};
+
+window.clearAllAttachments = function() {
+  S_attachments = [];
+  renderAttachments();
+};
+
+async function addFiles(files) {
+  if (!files || !files.length) return;
+  for (const file of Array.from(files)) {
+    if (file.size > 25 * 1024 * 1024) {
+      alert(`File "${file.name}" is over 25MB. Please choose a smaller file.`);
+      continue;
+    }
+    let kind = 'doc';
+    if (file.type.startsWith('image/')) kind = 'photo';
+    else if (file.type.startsWith('video/')) kind = 'video';
+    else if (file.type.startsWith('audio/')) kind = 'audio';
+    else if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) kind = 'document';
+
+    const base64 = await readFileAsBase64(file);
+    let dataUrl = '';
+    if (kind === 'photo') {
+      dataUrl = 'data:' + (file.type || 'image/jpeg') + ';base64,' + base64;
+    }
+
+    S_attachments.push({
+      name: file.name,
+      size: file.size,
+      type: file.type || (kind === 'document' ? 'application/pdf' : 'application/octet-stream'),
+      kind: kind,
+      base64: base64,
+      dataUrl: dataUrl
+    });
+  }
+  renderAttachments();
+}
+
+/* Audio Recording (Live Voice Notes) */
+let voiceRecorder = null;
+let voiceChunks = [];
+let voiceTimerInterval = null;
+let voiceRecordStartTime = 0;
+
+async function toggleLiveRecording() {
+  const timerWrap = $('#recLiveTimer');
+  const timerText = $('#recTimerText');
+  const btnLabel = $('#recBtnLabel');
+  const recDot = $('#recDot');
+
+  if (voiceRecorder && voiceRecorder.state === 'recording') {
+    voiceRecorder.stop();
+    return;
+  }
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    voiceChunks = [];
+    const mime = getBestAudioMime();
+    voiceRecorder = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
+    
+    voiceRecorder.ondataavailable = e => {
+      if (e.data.size > 0) voiceChunks.push(e.data);
+    };
+
+    voiceRecorder.onstop = () => {
+      stream.getTracks().forEach(t => t.stop());
+      clearInterval(voiceTimerInterval);
+      if (timerWrap) timerWrap.classList.add('hidden');
+      if (btnLabel) btnLabel.textContent = 'Record Audio';
+      if (recDot) recDot.classList.remove('animate-ping');
+
+      const resolvedMime = voiceRecorder.mimeType || mime || (isIOS ? 'audio/mp4' : 'audio/webm');
+      const blob = new Blob(voiceChunks, { type: resolvedMime });
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64 = typeof reader.result === 'string' ? reader.result.split(',')[1] : '';
+        const recIndex = S_attachments.filter(a => a.kind === 'recording').length + 1;
+        const ext = resolvedMime.indexOf('mp4') !== -1 ? 'm4a' : 'webm';
+        S_attachments.push({
+          name: `Voice_Note_${recIndex}.${ext}`,
+          size: blob.size,
+          type: resolvedMime,
+          kind: 'recording',
+          base64: base64,
+          dataUrl: ''
+        });
+        renderAttachments();
+      };
+      reader.readAsDataURL(blob);
+    };
+
+    voiceRecorder.start(250);
+    voiceRecordStartTime = Date.now();
+    if (timerWrap) timerWrap.classList.remove('hidden');
+    if (timerWrap) timerWrap.style.display = 'inline-flex';
+    if (btnLabel) btnLabel.textContent = 'Stop';
+    if (recDot) recDot.classList.add('animate-ping');
+
+    voiceTimerInterval = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - voiceRecordStartTime) / 1000);
+      const mins = String(Math.floor(elapsed / 60)).padStart(2, '0');
+      const secs = String(elapsed % 60).padStart(2, '0');
+      if (timerText) timerText.textContent = `${mins}:${secs}`;
+    }, 500);
+
+  } catch (err) {
+    alert('Microphone access denied or unavailable: ' + err.message);
+  }
+}
+
+function initAttachmentHandlers() {
+  const btnPhoto = $('#btnAttachPhoto');
+  const btnVideo = $('#btnAttachVideo');
+  const btnDoc = $('#btnAttachDoc');
+  const btnAudio = $('#btnAttachAudio');
+  const btnLiveRec = $('#btnLiveRecord');
+  const recStopBtn = $('#recStopBtn');
+  const clipBtn = $('#clipBtn');
+
+  const pickerPhoto = $('#pickerPhoto');
+  const pickerVideo = $('#pickerVideo');
+  const pickerDoc = $('#pickerDoc');
+  const pickerAudio = $('#pickerAudio');
+  const pickerAll = $('#pickerAll');
+
+  if (btnPhoto && pickerPhoto) {
+    btnPhoto.onclick = () => pickerPhoto.click();
+    pickerPhoto.onchange = e => { addFiles(e.target.files); pickerPhoto.value = ''; };
+  }
+  if (btnVideo && pickerVideo) {
+    btnVideo.onclick = () => pickerVideo.click();
+    pickerVideo.onchange = e => { addFiles(e.target.files); pickerVideo.value = ''; };
+  }
+  if (btnDoc && pickerDoc) {
+    btnDoc.onclick = () => pickerDoc.click();
+    pickerDoc.onchange = e => { addFiles(e.target.files); pickerDoc.value = ''; };
+  }
+  if (btnAudio && pickerAudio) {
+    btnAudio.onclick = () => pickerAudio.click();
+    pickerAudio.onchange = e => { addFiles(e.target.files); pickerAudio.value = ''; };
+  }
+  if (clipBtn && pickerAll) {
+    clipBtn.onclick = () => pickerAll.click();
+    pickerAll.onchange = e => { addFiles(e.target.files); pickerAll.value = ''; };
+  }
+  if (btnLiveRec) btnLiveRec.onclick = toggleLiveRecording;
+  if (recStopBtn) recStopBtn.onclick = toggleLiveRecording;
+
+  // Drag and drop onto prompt panel
+  const promptPanel = $('#promptPanel');
+  if (promptPanel) {
+    ['dragenter', 'dragover'].forEach(evt => {
+      promptPanel.addEventListener(evt, e => {
+        e.preventDefault();
+        promptPanel.style.borderColor = '#ffffff';
+      });
+    });
+    ['dragleave', 'drop'].forEach(evt => {
+      promptPanel.addEventListener(evt, e => {
+        e.preventDefault();
+        promptPanel.style.borderColor = '';
+      });
+    });
+    promptPanel.addEventListener('drop', e => {
+      e.preventDefault();
+      promptPanel.style.borderColor = '';
+      if (e.dataTransfer && e.dataTransfer.files) {
+        addFiles(e.dataTransfer.files);
+      }
+    });
+  }
+
+  // Clipboard paste (Ctrl+V) on textarea
+  const qEl = $('#q');
+  if (qEl) {
+    qEl.addEventListener('paste', e => {
+      if (e.clipboardData && e.clipboardData.files && e.clipboardData.files.length) {
+        addFiles(e.clipboardData.files);
+      }
+    });
+  }
+}
+
+/* ---------- Run ---------- */
+function newRun(prompt){return {id:Date.now(),prompt,ts:new Date().toISOString(),res:Object.fromEntries(IDS.map(i=>[i,{text:'',ms:null,status:'idle'}])),synth:null}}
+async function runOne(id,prompt,res,after){
+  const ctl=new AbortController();S.ctl[id]=ctl;const t0=performance.now();res.status='streaming';res.text='';res.ms=0;paint(id);
+  const liveTimer = setInterval(() => {
+    if (res.status === 'streaming') {
+      res.ms = Math.round(performance.now() - t0);
+      const l = document.getElementById('l-' + id);
+      if (l) l.textContent = fm(res.ms);
+    } else {
+      clearInterval(liveTimer);
+    }
+  }, 100);
+  try{
+    res.text=await callModel(id,prompt,t=>{
+      res.text=t;
+      res.ms=Math.round(performance.now()-t0);
+      paintBody(id);
+    },ctl.signal);
+    if (!res.text || !res.text.trim()) {
+      res.status = 'error';
+      res.text = `**Notice:** No response received from ${P[id]?.n || id}.`;
+    } else {
+      res.status = 'done';
+    }
+  }
+  catch(e){
+    res.status=e.name==='AbortError'?'idle':'error';
+    if(res.status==='error')res.text='**Error:** '+e.message;
+  }
+  finally{
+    clearInterval(liveTimer);
+  }
+  res.ms=Math.round(performance.now()-t0);paint(id);after?.();
+}
+async function send(){
+  if(listening&&rec){rec.onresult=null;rec.stop()}
+  const qEl=$('#q');
+  const promptText = qEl ? qEl.value.trim() : '';
+  const currentAttachments = [...S_attachments];
+  if(!promptText && !currentAttachments.length) return;
+
+  const effectivePrompt = promptText || (currentAttachments.length === 1
+    ? `Please analyze the attached ${currentAttachments[0].kind}: "${currentAttachments[0].name}".`
+    : `Please analyze the ${currentAttachments.length} attached files.`);
+
+  const promptObj = {
+    text: effectivePrompt,
+    attachments: currentAttachments
+  };
+
+  const act=IDS.filter(i=>S.on[i]);
+  if(!act.length)return alert('Toggle at least one model ON.');
+  track('prompt',{models:act});
+  if(qEl){qEl.value='';qEl.style.height='auto';}
+  S_attachments = [];
+  renderAttachments();
+
+  S.cur=newRun(effectivePrompt);
+  if(currentAttachments.length) {
+    S.cur.attachments = currentAttachments.map(a => ({ name: a.name, size: a.size, kind: a.kind }));
+  }
+  S.hist.unshift(S.cur);
+  const synthEl=$('#synth');
+  if(synthEl)synthEl.innerHTML='';
+  render();
+  const peerIds = ['openai', 'anthropic', 'gemini', 'perplexity', 'deepseek'].filter(i => S.on[i]);
+  const hasKoda = S.on['koda'];
+
+  if (hasKoda && peerIds.length > 0) {
+    if (S.cur.res['koda']) {
+      S.cur.res['koda'].status = 'streaming';
+      S.cur.res['koda'].text = '*Collecting responses from ' + peerIds.map(i => P[i].n).join(', ') + '...*';
+      paint('koda');
+    }
+    await Promise.all(peerIds.map(i => runOne(i, promptObj, S.cur.res[i])));
+    await runKodaBestSelector(promptObj, peerIds);
+  } else {
+    await Promise.all(act.map(i => runOne(i, promptObj, S.cur.res[i])));
+  }
+  S.hist=S.hist.slice(0,30);
+  sv('hub_hist',S.hist);
+  renderHist();
+  if (typeof broadcastRunToServer === 'function') broadcastRunToServer(S.cur);
+}
+
+async function runKodaBestSelector(promptObj, peerIds) {
+  const c = S.cur;
+  if (!c || !S.on['koda']) return;
+
+  const validPeers = peerIds.filter(i => c.res[i] && c.res[i].status === 'done' && c.res[i].text && c.res[i].text.trim());
+  if (validPeers.length === 0) {
+    return runOne('koda', promptObj, c.res['koda']);
+  }
+
+  const ctl = new AbortController();
+  S.ctl['koda'] = ctl;
+  const t0 = performance.now();
+  c.res['koda'].status = 'streaming';
+  c.res['koda'].text = '*Synthesizing responses across ' + validPeers.map(i => P[i].n).join(', ') + '...*';
+  c.res['koda'].ms = null;
+  paint('koda');
+
+  const peerTexts = validPeers.map(i => `### ${P[i].n}\n${c.res[i].text}`).join('\n\n---\n\n');
+  const userQuestion = (typeof promptObj === 'object' && promptObj.text) ? promptObj.text : String(promptObj || '');
+  
+  const evalPrompt = `You are Koda, an advanced reasoning and synthesis system.
+The user asked:
+"${userQuestion}"
+
+Below are the independent responses generated by ${validPeers.length} models (${validPeers.map(i => P[i].n).join(', ')}):
+
+${peerTexts}
+
+Provide a direct, high-quality synthesis:
+1. **Best Response & Summary**: Concisely summarize the most accurate and well-reasoned points.
+2. **Comprehensive Answer**: Provide the definitive, comprehensive answer combining the strongest elements while correcting any inaccuracies or omissions.
+3. **Model Comparison**: Brief bulleted notes on how the individual models answered (key strengths or caveats).
+
+Be objective, concise, and structured.`;
+
+  try {
+    c.res['koda'].text = await callModel('koda', evalPrompt, t => {
+      c.res['koda'].text = t;
+      c.res['koda'].ms = Math.round(performance.now() - t0);
+      paintBody('koda');
+    }, ctl.signal);
+    if (!c.res['koda'].text || !c.res['koda'].text.trim()) {
+      c.res['koda'].status = 'error';
+      c.res['koda'].text = '**Notice:** Koda AI could not evaluate the peer responses.';
+    } else {
+      c.res['koda'].status = 'done';
+    }
+  } catch (e) {
+    c.res['koda'].status = e.name === 'AbortError' ? 'idle' : 'error';
+    if (c.res['koda'].status === 'error') {
+      c.res['koda'].text = '**Error evaluating responses:** ' + e.message;
+    }
+  }
+  c.res['koda'].ms = Math.round(performance.now() - t0);
+  paint('koda');
+}
+
+async function triggerKodaBest() {
+  if (!S.cur) return alert('No prompt has been executed yet.');
+  const peerIds = ['openai', 'anthropic', 'gemini', 'perplexity', 'deepseek'].filter(i => S.on[i]);
+  const promptObj = { text: S.cur.prompt, attachments: S.cur.attachments || [] };
+  await runKodaBestSelector(promptObj, peerIds);
+  renderHist();
+  if (typeof broadcastRunToServer === 'function') broadcastRunToServer(S.cur);
+}
+async function synth(){
+  const c=S.cur;if(!c)return;
+  const parts=IDS.filter(i=>c.res[i]&&c.res[i].status==='done'&&c.res[i].text).map(i=>`### ${P[i].n}\n${c.res[i].text}`);
+  if(parts.length<2)return alert('Need at least 2 completed answers to synthesize.');
+  const lead=S.lead,prompt=`You are the lead synthesizer. Below are answers from several AI models to the same question. Write a consolidated comparative summary in markdown: (1) points of agreement, (2) key differences or disagreements, (3) any likely errors or unsupported claims, (4) a final best-answer synthesis.\n\nQuestion: ${c.prompt}\n\n${parts.join('\n\n')}`;
+  const box=$('#synth');box.innerHTML=`<div class="panel p-5"><div class="flex items-center justify-between pb-3 mb-3 border-b border-white/10"><div class="font-bold text-white text-sm">Synthesis by ${P[lead].n}</div><span id="sS" class="text-xs font-mono text-[#8e94a0]">streaming…</span></div><div id="sB" class="md text-sm leading-relaxed"></div></div>`;
+  const t0=performance.now();
+  try{c.synth=await callModel(lead,prompt,t=>{$('#sB').innerHTML=md(t)},new AbortController().signal);$('#sS').textContent=`done · ${Math.round(performance.now()-t0)} ms`}
+  catch(e){$('#sB').innerHTML=md('**Error:** '+e.message);$('#sS').textContent='error'}
+  sv('hub_hist',S.hist);
+  if (typeof broadcastRunToServer === 'function') broadcastRunToServer(c);
+}
+
+
+function cardHTML(id){
+  const p=P[id],r=S.cur?.res[id]||{text:'',ms:null,status:'idle'};
+  const isKoda = (id==='koda');
+  return `<section class="card flex flex-col min-w-0 max-w-full overflow-hidden" id="c-${id}">
+    <div class="flex items-center gap-1.5 sm:gap-2 px-3 py-2.5 border-b border-white/10 flex-wrap">
+      <span class="dot ${r.status}" id="d-${id}"></span>
+      <b class="text-white text-sm font-semibold">${p.n}</b>
+      <span id="s-${id}" class="text-xs text-[#8e94a0] ml-auto font-mono">${r.status}</span>
+      <span id="l-${id}" class="text-xs px-2 py-0.5 rounded-[8px] bg-white/5 font-mono text-[#8e94a0]">${fm(r.ms)}</span>
+      ${isKoda?'<button class="btn !py-0.5 !px-2 text-xs text-white" onclick="triggerKodaBest()" title="Synthesize outputs">Synthesize</button>':''}
+      <button class="btn !py-0.5 !px-2.5 text-xs text-white/80 hover:text-white" onclick="copy('${id}',this)">Copy</button>
+    </div>
+    <div class="body md flex-1 overflow-x-auto min-w-0" id="b-${id}">${r.text?md(r.text):isKoda?`<div class="py-12 px-4 text-center max-w-sm mx-auto space-y-2">
+      <div class="w-8 h-8 mx-auto rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-[#8e94a0]">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+      </div>
+      <div class="text-white font-medium text-sm">Consensus View</div>
+      <p class="text-[#8e94a0] text-xs leading-relaxed">
+        Aggregates and synthesizes responses across active models.
+      </p>
+    </div>`:`<div class="text-[#8e94a0] text-xs py-14 text-center font-mono">Ready for query</div>`}</div>
+  </section>`;
+}
+const fm=ms=>ms==null?'-':ms>=1000?(ms/1000).toFixed(1)+' s':ms+' ms';
+function render(){
+  const g = $('#grid');
+  const tog = $('#toggles');
+  if (!g || !tog) return;
+
+  const exs=$('#ex');if(exs)exs.style.display=S.cur?'none':'flex';
+  tog.innerHTML=IDS.map(i=>`<button class="btn !py-1 !px-3 text-xs flex items-center gap-1.5 flex-shrink-0 whitespace-nowrap ${S.on[i]?'on':''}" data-t="${i}"><span class="dot ${S.on[i]?'done':''}"></span>${P[i].n}</button>`).join('');
+  const leadEl = $('#lead');
+  if (leadEl) leadEl.innerHTML=IDS.map(i=>`<option value="${i}" ${S.lead===i?'selected':''}>${P[i].n}</option>`).join('');
+  document.querySelectorAll('[data-v]').forEach(b=>b.classList.toggle('on',b.dataset.v===S.view));
+  const tab=S.view==='tab';
+  const tabsEl = $('#tabs');
+  if(tab && tabsEl){
+    const modelTabs = IDS.map(i=>`<button class="btn !py-1 !px-3 text-xs flex-shrink-0 whitespace-nowrap ${S.tab===i?'on':''}" data-tab="${i}">${P[i].n}</button>`).join('');
+    const spTab = `<button class="btn !py-1 !px-3 text-xs flex items-center gap-1.5 flex-shrink-0 whitespace-nowrap ${S.tab==='spotify'?'on':''}" data-tab="spotify"><svg viewBox="0 0 24 24" width="12" height="12" fill="#1db954"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.498 17.306c-.218.358-.684.47-1.042.252-2.855-1.744-6.45-2.14-10.684-1.173-.41.093-.815-.164-.908-.573-.093-.41.164-.816.574-.908 4.637-1.06 8.604-.61 11.808 1.35.358.218.47.684.252 1.052zm1.468-3.26c-.274.446-.86.588-1.306.314-3.268-2.008-8.25-2.59-12.114-1.417-.497.15-1.026-.135-1.176-.632-.15-.497.135-1.026.632-1.176 4.414-1.34 9.907-.692 13.65 1.605.446.274.588.86.314 1.306zm.135-3.394c-3.92-2.328-10.38-2.543-14.135-1.403-.6.182-1.24-.163-1.422-.763-.182-.6.163-1.24.763-1.422 4.314-1.31 11.443-1.06 15.932 1.604.54.32.716 1.022.396 1.562-.32.54-1.022.716-1.562.396z"/></svg><span>Spotify</span></button>`;
+    tabsEl.innerHTML = modelTabs + spTab;
+  } else if (tabsEl) {
+    tabsEl.innerHTML = '';
+  }
+  g.style.setProperty('--cols',tab?1:S.view);
+  g.style.setProperty('--mcols',tab?1:Math.min(S.view,3));
+  g.style.setProperty('--tcols',tab?1:Math.min(S.view,2));
+  if(tab && S.tab==='spotify'){
+    g.innerHTML = renderSpotifyWorkspaceCard();
+    mountSpotifyEmbed('workspace');
+  } else {
+    const ids = tab ? [S.tab] : IDS.filter(i=>S.on[i]);
+    g.innerHTML = ids.filter(i=>P[i]).map(cardHTML).join('')||'<div class="opacity-50 p-6">No models enabled.</div>';
+    mountSpotifyEmbed('modal');
+  }
+}
+/* ---------- 2-Page Routing: Landing (Page 1) vs Workspace (Page 2) ---------- */
+function navigateToLanding(targetSection) {
+  if (targetSection === 'models') {
+    const el = document.getElementById('models');
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+    else window.location.href = '#models';
+  } else {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+function navigateToWorkspace(isNewChat = false, targetSection = null) {
+  let target = 'chat.html';
+  const params = [];
+  if (isNewChat) params.push('new=1');
+  if (targetSection) params.push('model=' + targetSection);
+  if (params.length) target += '?' + params.join('&');
+  window.location.href = target;
+}
+
+function focusModelAndNavigate(modelId) {
+  if (modelId) {
+    S.on[modelId] = true;
+    sv('hub_on', S.on);
+    if (modelId === 'koda') {
+      S.view = 'tab';
+      S.tab = 'koda';
+      sv('hub_view', S.view);
+      sv('hub_tab', S.tab);
+    }
+  }
+  navigateToWorkspace(false);
+}
+
+function updatePageViewFromUrl() {
+  const hash = (window.location.hash || '').toLowerCase();
+  let savedPage = 'landing';
+  try { savedPage = sessionStorage.getItem('koda_page') || 'landing'; } catch (_) {}
+
+  if (hash === '#workspace' || hash === '#app' || hash === '#chat' || savedPage === 'workspace') {
+    navigateToWorkspace(false);
+  } else if (hash === '#models') {
+    navigateToLanding('models');
+  } else {
+    navigateToLanding();
+  }
+}
+window.addEventListener('hashchange', updatePageViewFromUrl);
+
+function focusKodaTab(){
+  S.on['koda']=true;
+  sv('hub_on',S.on);
+  S.view='tab';
+  S.tab='koda';
+  sv('hub_view',S.view);
+  sv('hub_tab',S.tab);
+  navigateToWorkspace(false);
+  const q=$('#q');
+  if(q){setTimeout(()=>q.focus(),150)}
+}
+
+async function connectChatGptMirror() {
+  try {
+    const res = await fetch('/api/chatgpt/mirror/status');
+    let j = {};
+    try { j = await res.json(); } catch (_) {}
+    if (j && j.ready) return;
+    await fetch('/api/chatgpt/mirror/login', { method: 'POST' });
+    setTimeout(checkChatGptMirrorStatus, 800);
+  } catch (_) {}
+}
+
+async function checkChatGptMirrorStatus() {
+  try {
+    const res = await fetch('/api/chatgpt/mirror/status');
+    let j = {};
+    try { j = await res.json(); } catch (_) {}
+    window.__chatgptMirrorReady = !!(j.ready || j.companionActive);
+    window.__chatgptMirrorUser = j.user || null;
+  } catch (_) {}
+}
+setInterval(checkChatGptMirrorStatus, 8000);
+setTimeout(checkChatGptMirrorStatus, 1500);
+
+async function connectClaudeMirror() {
+  try {
+    const res = await fetch('/api/claude/mirror/status');
+    let j = {};
+    try { j = await res.json(); } catch (_) {}
+    if (j && j.ready) return;
+    await fetch('/api/claude/mirror/login', { method: 'POST' });
+    setTimeout(checkClaudeMirrorStatus, 800);
+  } catch (_) {}
+}
+
+async function checkClaudeMirrorStatus() {
+  try {
+    const res = await fetch('/api/claude/mirror/status');
+    let j = {};
+    try { j = await res.json(); } catch (_) {}
+    window.__claudeMirrorReady = !!j.ready;
+    window.__claudeMirrorUser = j.user || null;
+  } catch (_) {}
+}
+setInterval(checkClaudeMirrorStatus, 8000);
+setTimeout(checkClaudeMirrorStatus, 1500);
+function paint(id){const r=S.cur?.res[id];if(!r||!$('#d-'+id))return;$('#d-'+id).className='dot '+r.status;$('#s-'+id).textContent=r.status;$('#l-'+id).textContent=fm(r.ms);paintBody(id)}
+const pend={};function paintBody(id){if(pend[id])return;pend[id]=requestAnimationFrame(()=>{pend[id]=0;const b=$('#b-'+id),r=S.cur?.res[id];if(b&&r){const bot=b.scrollTop+b.clientHeight>=b.scrollHeight-40;if(r.status==='streaming'&&!r.text){b.innerHTML='<div class=\"py-8 px-4 text-center text-white/50 space-y-2\"><div class=\"inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-white/70\"><span class=\"w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping inline-block\"></span>Generating answer...</div></div>'}else{b.innerHTML=md(r.text)}if(bot)b.scrollTop=b.scrollHeight}const l=$('#l-'+id);if(l&&r&&r.ms!=null)l.textContent=fm(r.ms)})}
+function copy(id,btn){if(btn){const o=btn.textContent;btn.textContent='Copied';setTimeout(()=>{btn.textContent=o},1200)}const t=S.cur?.res[id]?.text||'';const fb=()=>{const a=document.createElement('textarea');a.value=t;a.style.cssText='position:fixed;opacity:0';document.body.appendChild(a);a.select();try{document.execCommand('copy')}catch{}a.remove()};if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).catch(fb);else fb()}
+function formatRelativeTime(ts) {
+  if (!ts) return '';
+  const d = new Date(ts);
+  const now = Date.now();
+  const diff = Math.floor((now - d.getTime()) / 1000);
+  if (diff < 60) return 'Just now';
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
+  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
+
+function renderHist(filterText) {
+  const histEl = $('#hist');
+  if (!histEl) return;
+  const qFilter = (typeof filterText === 'string' ? filterText : ($('#histSearch') ? $('#histSearch').value : '') || '').toLowerCase().trim();
+  const countEl = $('#histCount');
+  if (countEl) countEl.textContent = `${S.hist.length} chat${S.hist.length === 1 ? '' : 's'}`;
+
+  const filtered = S.hist.map((h, i) => ({ h, i })).filter(({ h }) => {
+    if (!qFilter) return true;
+    return (h.prompt || '').toLowerCase().includes(qFilter);
+  });
+
+  if (!filtered.length) {
+    histEl.innerHTML = `<div class="py-8 px-2 text-center text-[#8e94a0] opacity-60">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" class="mx-auto mb-2 opacity-50"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <p class="text-xs font-medium">${qFilter ? 'No matching chats found' : 'No previous chats yet'}</p>
+      <p class="text-[10px] mt-1 text-[#8e94a0]/60">${qFilter ? 'Try a different keyword' : 'Executed prompts are saved here'}</p>
+    </div>`;
+    return;
+  }
+
+  histEl.innerHTML = filtered.map(({ h, i }) => {
+    const isCur = S.cur && (S.cur === h || S.cur.ts === h.ts || S.cur.prompt === h.prompt);
+    const dateStr = formatRelativeTime(h.ts);
+    const doneCount = Object.values(h.res || {}).filter(r => r && r.status === 'done').length;
+    const cleanPrompt = (h.prompt || 'Untitled Conversation').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return `<div class="group relative rounded-xl transition-all duration-150 border ${isCur ? 'bg-white/10 border-white/40 shadow-sm' : 'bg-white/[0.02] border-white/10 hover:bg-white/[0.06] hover:border-white/20'} p-2.5 cursor-pointer" data-h="${i}">
+      <div class="flex items-start justify-between gap-1.5">
+        <div class="font-medium text-white text-xs line-clamp-2 break-words flex-1 pr-1 leading-snug">
+          ${cleanPrompt}
+        </div>
+        <button type="button" class="del-hist-btn opacity-0 group-hover:opacity-100 p-1 hover:text-red-400 text-[#8e94a0] transition rounded hover:bg-white/10 shrink-0" data-del-h="${i}" title="Delete chat">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        </button>
+      </div>
+      <div class="mt-2 flex items-center justify-between text-[10px] text-[#8e94a0] font-mono">
+        <span>${dateStr}</span>
+        <span class="px-1.5 py-0.5 rounded bg-white/5 text-[9px] text-white/70">${doneCount} models${h.synth ? ' • Synced' : ''}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleSidebar(forceState) {
+  const s = $('#side');
+  if (!s) return;
+  const isHidden = forceState !== undefined ? !forceState : !s.classList.contains('hidden');
+  if (isHidden) {
+    s.classList.add('hidden');
+    s.classList.remove('md:flex');
+    if ($('#expandSideBtn')) $('#expandSideBtn').classList.remove('hidden');
+    if ($('#hBtnLabel')) $('#hBtnLabel').textContent = 'Show Sidebar';
+    if ($('#mobileSideLabel')) $('#mobileSideLabel').textContent = 'Chats';
+    sv('hub_sidebar_docked', false);
+  } else {
+    s.classList.remove('hidden');
+    s.classList.add('md:flex');
+    if ($('#expandSideBtn')) $('#expandSideBtn').classList.add('hidden');
+    if ($('#hBtnLabel')) $('#hBtnLabel').textContent = 'Hide Sidebar';
+    if ($('#mobileSideLabel')) $('#mobileSideLabel').textContent = 'Close';
+    sv('hub_sidebar_docked', true);
+  }
+}
+
+function startNewChat() {
+  Object.values(S.ctl).forEach(c => { try { c.abort(); } catch (_) {} });
+  S.cur = null;
+  if ($('#synth')) $('#synth').innerHTML = '';
+  const qEl = $('#q');
+  if (qEl) {
+    qEl.value = '';
+    qEl.style.height = 'auto';
+    qEl.focus();
+  }
+  render();
+  renderHist();
+  if (typeof broadcastClearToServer === 'function') broadcastClearToServer();
+}
+
+function clearAllHistory() {
+  if (!S.hist || !S.hist.length) return;
+  if (!confirm('Are you sure you want to clear all chat history?')) return;
+  S.hist = [];
+  S.cur = null;
+  sv('hub_hist', []);
+  if ($('#synth')) $('#synth').innerHTML = '';
+  render();
+  renderHist();
+  if (typeof broadcastClearToServer === 'function') broadcastClearToServer();
+}
+
+/* ---------- Export ---------- */
+function dl(name,txt,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type}));a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
+function toMD(){return S.hist.map(h=>`## ${h.prompt}\n_${h.ts}_\n\n`+IDS.filter(i=>h.res[i]&&h.res[i].text).map(i=>`### ${P[i].n} (${h.res[i].ms??'?'} ms)\n\n${h.res[i].text}\n`).join('\n')+(h.synth?`\n### Synthesis\n\n${h.synth}\n`:'')).join('\n---\n\n')}
+
+/* ---------- Keys & Vault Helper ---------- */
+function buildKeys(){}
+function saveKeys(){}
+
+/* ---------- Server Vault Check ---------- */
+async function checkServerVault() {
+  if (!/^https?:$/.test(location.protocol) || location.hostname.endsWith('github.io')) return;
+  try {
+    const res = await fetch('./api/vault/status');
+    const ct = res.headers.get('content-type') || '';
+    if (!res.ok || !ct.includes('application/json')) return;
+    const json = await res.json();
+    if (json && json.available) {
+      S.vaultAvailable = json.available;
+      if (json.available.includes('gemini')) {
+        delete S.keys.gemini;
+        sv('hub_keys', S.keys);
+      }
+      render();
+    }
+  } catch (_) {}
+}
+window.vaultPromise = checkServerVault();
+
+function initGoogle(){
+  const cid=ls('hub_gid','');const u=ls('hub_user',null);
+  const gu=$('#gUser');
+  if(u&&gu){gu.innerHTML=`<img src="${u.picture}" class="w-6 h-6 rounded-full" referrerpolicy="no-referrer"><span class="hidden sm:inline">${u.name}</span><button class="btn !py-0.5" id="so">Sign out</button>`;const so=$('#so');if(so)so.onclick=()=>{localStorage.removeItem('hub_user');location.reload()};return}
+  if(!cid){return}
+  if(!window.google?.accounts)return setTimeout(initGoogle,400);
+  const gb=$('#gBtn');
+  if(!gb)return;
+  google.accounts.id.initialize({client_id:cid,callback:r=>{try{const b=r.credential.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');const j=JSON.parse(decodeURIComponent(escape(atob(b))));sv('hub_user',{name:j.name,picture:j.picture,email:j.email});location.reload()}catch(e){alert('Sign-in failed')}}});
+  google.accounts.id.renderButton(gb,{theme:'filled_black',size:'medium'});
+}
+
+/* ---------- Events ---------- */
+document.addEventListener('click',e=>{
+  const delBtn = e.target.closest('[data-del-h]');
+  if (delBtn) {
+    e.stopPropagation();
+    const idx = parseInt(delBtn.dataset.delH, 10);
+    if (!isNaN(idx) && S.hist[idx]) {
+      const deletedItem = S.hist.splice(idx, 1)[0];
+      sv('hub_hist', S.hist);
+      if (S.cur === deletedItem) {
+        S.cur = null;
+        if ($('#synth')) $('#synth').innerHTML = '';
+        render();
+      }
+      renderHist();
+    }
+    return;
+  }
+  const t=e.target.closest('[data-t],[data-v],[data-tab],[data-h]');if(!t)return;
+  if(t.dataset.t){S.on[t.dataset.t]=!S.on[t.dataset.t];sv('hub_on',S.on);render()}
+  else if(t.dataset.v){S.view=t.dataset.v;sv('hub_view',S.view);render()}
+  else if(t.dataset.tab){S.tab=t.dataset.tab;render()}
+  else if(t.dataset.h!==undefined){
+    const idx = +t.dataset.h;
+    if (S.hist[idx]) {
+      S.cur = S.hist[idx];
+      if($('#synth'))$('#synth').innerHTML=S.cur.synth?`<div class="panel p-4"><div class="font-bold text-white text-sm mb-2">Synthesis</div><div class="md text-sm">${md(S.cur.synth)}</div></div>`:'';
+      navigateToWorkspace(false);
+      render();
+      renderHist();
+      if(innerWidth<768&&$('#side'))$('#side').classList.add('hidden');
+    }
+  }
+});
+
+const sendBtn=$('#send'); if(sendBtn) sendBtn.onclick=send;
+const qEl=$('#q');
+if(qEl){
+  if(isMac){
+    qEl.placeholder = "Ask all enabled models, or describe what to do with attachments… (⌘+Enter to send, Shift+Enter for newline)";
+  }
+  qEl.addEventListener('keydown',e=>{
+    if((e.key==='Enter'&&!e.shiftKey) || ((e.metaKey||e.ctrlKey)&&e.key==='Enter')){
+      e.preventDefault();
+      send();
+    }
+  });
+  const fit=()=>{qEl.style.height='auto';qEl.style.height=Math.min(qEl.scrollHeight,180)+'px'};
+  qEl.addEventListener('input',fit);
+  document.addEventListener('click',e=>{const b=e.target.closest('[data-ex]');if(b){qEl.value=b.dataset.ex;fit();qEl.focus()}});
+}
+const synBtn=$('#syn'); if(synBtn) synBtn.onclick=synth;
+const leadSel=$('#lead'); if(leadSel) leadSel.onchange=e=>{S.lead=e.target.value;sv('hub_lead',S.lead)};
+const hBtn=$('#hBtn'); if(hBtn) hBtn.onclick=()=>toggleSidebar();
+const newChatBtn=$('#newChatBtn'); if(newChatBtn) newChatBtn.onclick=startNewChat;
+const clrBtn=$('#clr'); if(clrBtn) clrBtn.onclick=startNewChat;
+const clrAllHistBtn=$('#clrAllHistBtn'); if(clrAllHistBtn) clrAllHistBtn.onclick=clearAllHistory;
+const collapseSideBtn=$('#collapseSideBtn'); if(collapseSideBtn) collapseSideBtn.onclick=()=>toggleSidebar(false);
+const expandSideBtn=$('#expandSideBtn'); if(expandSideBtn) expandSideBtn.onclick=()=>toggleSidebar(true);
+const histSearchEl=$('#histSearch'); if(histSearchEl) histSearchEl.oninput=e=>renderHist(e.target.value);
+(function initSidebarState() {
+  const isDocked = ls('hub_sidebar_docked', true);
+  if (innerWidth >= 768 && isDocked === false) {
+    toggleSidebar(false);
+  }
+})();
+
+/* Usage tracking: only talks to server.js (same origin); silent when opened as a plain file */
+const TR={sid:(function(){let v=ls('hub_sid',null);if(!v){v=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():(Date.now().toString(36)+Math.random().toString(36).slice(2,12));sv('hub_sid',v)}return v})()};
+function track(type,extra){if(!/^https?:$/.test(location.protocol)||location.hostname.endsWith('github.io'))return;try{const u=ls('hub_user',null)||{};fetch('./api/ping',{method:'POST',headers:{'content-type':'application/json'},keepalive:true,body:JSON.stringify(Object.assign({sid:TR.sid,type:type,name:u.name,email:u.email},extra||{}))}).catch(function(){})}catch(e){}}
+track('open');setInterval(function(){if(!document.hidden)track('beat')},20000);
+
+document.addEventListener('keydown',e=>{
+  const isCmd = e.metaKey || e.ctrlKey;
+  if(e.key==='Escape'){
+    $('#modal')?.classList.add('hidden');
+    const sm=$('#supModal');if(sm)sm.classList.add('hidden');
+    if(typeof closeSpotifyModal==='function')closeSpotifyModal();
+    if(typeof closeMacModal==='function')closeMacModal();
+    if(typeof closeIosModal==='function')closeIosModal();
+    if(typeof closeAndroidModal==='function')closeAndroidModal();
+    if(innerWidth<768&&$('#side'))$('#side').classList.add('hidden');
+  }
+  // Cmd/Ctrl + K: Focus prompt input
+  if(isCmd && (e.key==='k'||e.key==='K')){
+    e.preventDefault();
+    if(qEl){qEl.focus();qEl.select();}
+  }
+  // Cmd/Ctrl + Shift + H: Toggle History drawer
+  if(isCmd && e.shiftKey && (e.key==='h'||e.key==='H')){
+    e.preventDefault();
+    toggleSidebar();
+  }
+  // Option + S / Cmd + Option + S: Toggle Spotify
+  if((e.altKey&&(e.key==='s'||e.key==='S'||e.key==='m'||e.key==='M')) || (isCmd && e.altKey && (e.key==='s'||e.key==='S'))){
+    e.preventDefault();
+    if(typeof openSpotifyModal==='function')openSpotifyModal();
+  }
+  // Cmd/Ctrl + Shift + S: Synthesize
+  if(isCmd && e.shiftKey && (e.key==='s'||e.key==='S')){
+    e.preventDefault();
+    if(typeof synth==='function')synth();
+  }
+});
+/* Voice typing (Web Speech API + Local Server STT Fallback) */
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+let rec=null,listening=false,base='',fin='',ph0='',mediaRec=null,audioChunks=[],recStartTime=0;
+
+function showVoiceToast(msg){
+  showToast(msg);
+}
+
+function setMic(on,customPh){
+  listening=on;
+  const b=$('#mic');
+  if(!b)return;
+  b.classList.toggle('rec',on);
+  b.setAttribute('aria-pressed',on?'true':'false');
+  b.title=on?'Stop voice input':'Voice input';
+  const qEl = document.getElementById('q');
+  if (qEl) qEl.placeholder=on?(customPh||'Listening... speak now (click to finish)'):ph0;
+}
+
+function startSR(){
+  try{
+    rec=new SR();
+    rec.lang=ls('hub_lang','')||navigator.language||'en-US';
+    rec.interimResults=true;
+    rec.continuous=true;
+    base=q.value&&!/\s$/.test(q.value)?q.value+' ':q.value;
+    fin='';
+    rec.onresult=function(e){
+      let tmp='';
+      for(let i=e.resultIndex;i<e.results.length;i++){
+        const t=e.results[i][0].transcript;
+        if(e.results[i].isFinal)fin+=(fin&&!/^\s/.test(t)?' ':'')+t;
+        else tmp+=t;
+      }
+      q.value=base+fin+(fin&&tmp&&!/^\s/.test(tmp)?' ':'')+tmp;
+      fit();
+    };
+    rec.onerror=function(e){
+      console.warn('SpeechRecognition warning:',e.error);
+      if(e.error==='not-allowed'){
+        showVoiceToast('Microphone access blocked. Allow mic in browser settings.');
+        setMic(false);
+      } else if(e.error==='network'||e.error==='service-not-allowed'){
+        // Auto fallback to high-quality server-side recording
+        try{rec.abort()}catch(_){}
+        startMediaRecorder();
+      } else if(e.error==='audio-capture'){
+        showVoiceToast('No microphone hardware detected.');
+        setMic(false);
+      }
+    };
+    rec.onend=function(){
+      if(!mediaRec||mediaRec.state!=='recording'){
+        setMic(false);
+        q.value=q.value.replace(/[ \t]+$/,'');
+        fit();
+      }
+    };
+    rec.start();
+    setMic(true);
+  }catch(err){
+    startMediaRecorder();
+  }
+}
+
+async function startMediaRecorder(){
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    audioChunks=[];
+    recStartTime=Date.now();
+    const chosenMime=getBestAudioMime();
+    mediaRec=new MediaRecorder(stream,chosenMime?{mimeType:chosenMime}:undefined);
+    mediaRec.ondataavailable=e=>{if(e.data.size>0)audioChunks.push(e.data)};
+    mediaRec.onstop=async()=>{
+      stream.getTracks().forEach(t=>t.stop());
+      setMic(false);
+      const elapsed=Date.now()-recStartTime;
+      if(elapsed<400){
+        q.placeholder=ph0;
+        return;
+      }
+      q.placeholder='Transcribing voice input...';
+      const resolvedMime=mediaRec.mimeType||chosenMime||(isIOS?'audio/mp4':'audio/webm');
+      const audioBlob=new Blob(audioChunks,{type:resolvedMime});
+      try{
+        const reader=new FileReader();
+        reader.onloadend=async()=>{
+          const base64=reader.result.split(',')[1];
+          const key=S.keys.gemini||S.keys.openai||'';
+          try{
+            const res=await fetch('/api/transcribe',{
+              method:'POST',
+              headers:{'Content-Type':'application/json','x-api-key':key},
+              body:JSON.stringify({audio:base64,mimeType:resolvedMime,lang:ls('hub_lang','')})
+            });
+            const data=await res.json();
+            if(data.text&&data.text.trim()){
+              q.value=(q.value&&!/\s$/.test(q.value)?q.value+' ':q.value)+data.text.trim();
+              fit();
+            } else if(data.error){
+              showVoiceToast('Voice note: please speak clearly and retry.');
+            }
+          }catch(netErr){
+            showVoiceToast('Voice server connection busy. Please retry.');
+          }finally{
+            q.placeholder=ph0;
+          }
+        };
+        reader.readAsDataURL(audioBlob);
+      }catch(err){
+        q.placeholder=ph0;
+        showVoiceToast('Audio error: '+err.message);
+      }
+    };
+    mediaRec.start();
+    setMic(true,'Recording audio... tap mic again to transcribe');
+  }catch(err){
+    setMic(false);
+    showVoiceToast('Could not access microphone: '+err.message);
+  }
+}
+
+function toggleMic(){
+  if(location.protocol==='file:'){
+    alert('Voice speech-to-text requires a local server because browsers block microphone and speech recognition on file:// URLs.\n\nTo use it:\n1. Open the folder and double-click start-server.bat (or run "node server.js")\n2. Open http://localhost:3000 in Chrome, Edge or Safari');
+    return;
+  }
+  if(listening){
+    if(rec)try{rec.stop()}catch(_){}
+    if(mediaRec&&mediaRec.state==='recording')try{mediaRec.stop()}catch(_){}
+    return;
+  }
+  // On iOS devices, bypass webkitSpeechRecognition directly to MediaRecorder for seamless mobile dictation
+  if(isIOS && navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder){
+    startMediaRecorder();
+    return;
+  }
+  if(SR){
+    startSR();
+  }else if(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia&&window.MediaRecorder){
+    startMediaRecorder();
+  }else{
+    showVoiceToast('Voice input is not supported in this browser. Try Chrome, Edge or Safari.');
+  }
+}
+/* ---------- Customer Support ---------- */
+function initSupport(){
+  const supModal=$('#supModal'), supBtn=$('#supBtn'), supClose=$('#supClose');
+  const openSup=()=>{if(supModal){supModal.classList.remove('hidden');lockBodyScroll(true);}};
+  const closeSup=()=>{if(supModal){supModal.classList.add('hidden');lockBodyScroll(false);}};
+  if(supBtn)supBtn.onclick=openSup;
+  if(supClose)supClose.onclick=closeSup;
+
+  const tabFaqBtn=$('#tabFaqBtn'), tabAiBtn=$('#tabAiBtn'), tabTicketBtn=$('#tabTicketBtn');
+  const supTabFaq=$('#supTabFaq'), supTabAi=$('#supTabAi'), supTabTicket=$('#supTabTicket');
+  const setTab=active=>{
+    if(tabFaqBtn)tabFaqBtn.classList.toggle('on',active==='faq');
+    if(tabAiBtn)tabAiBtn.classList.toggle('on',active==='ai');
+    if(tabTicketBtn)tabTicketBtn.classList.toggle('on',active==='ticket');
+    if(supTabFaq)supTabFaq.classList.toggle('hidden',active!=='faq');
+    if(supTabAi)supTabAi.classList.toggle('hidden',active!=='ai');
+    if(supTabTicket)supTabTicket.classList.toggle('hidden',active!=='ticket');
+  };
+  if(tabFaqBtn)tabFaqBtn.onclick=()=>setTab('faq');
+  if(tabAiBtn)tabAiBtn.onclick=()=>setTab('ai');
+  if(tabTicketBtn)tabTicketBtn.onclick=()=>setTab('ticket');
+
+  const chatBox=$('#supChatBox'), chatIn=$('#supChatInput'), chatSend=$('#supChatSend');
+  const addChatMsg=(sender,text)=>{
+    if(!chatBox)return;
+    const d=document.createElement('div');
+    d.innerHTML=`<b>${sender}:</b> ${text.replace(/</g,'&lt;').replace(/\n/g,'<br>')}`;
+    chatBox.appendChild(d);chatBox.scrollTop=chatBox.scrollHeight;
+  };
+  const handleSupportAi=async()=>{
+    const q=(chatIn?.value||'').trim();if(!q)return;
+    addChatMsg('You',q);if(chatIn)chatIn.value='';
+    const lq=q.toLowerCase();
+    if(lq.includes('mic')||lq.includes('speech')||lq.includes('voice')||lq.includes('stt')){
+      setTimeout(()=>addChatMsg('Support Bot','For Speech-to-Text, please run start-server.bat and open http://localhost:3000 in Google Chrome or Edge. Browsers block Web Speech on file:// URLs.'),350);
+      return;
+    }
+    if(lq.includes('key')||lq.includes('free')||lq.includes('api')){
+      setTimeout(()=>addChatMsg('Support Bot','All models run through your unified Google Gemini key saved in the admin dashboard (/admin). One key powers all 5 AI models!'),350);
+      return;
+    }
+    if(lq.includes('who are you')||lq.includes('google')||lq.includes('persona')||lq.includes('identity')){
+      setTimeout(()=>addChatMsg('Support Bot','Each model panel has an authentic persona configured, so each answers with its own unique identity and style.'),350);
+      return;
+    }
+    const activeKeyModel = 'gemini';
+    if(activeKeyModel){
+      addChatMsg('Support Bot','Thinking...');
+      const loadingDiv=chatBox.lastElementChild;
+      try{
+        const supPrompt=`You are the Koda Customer Support Assistant. Provide a concise, helpful 2-sentence answer about Koda (multi-model AI comparison tool for ChatGPT, Claude, Gemini, Perplexity, DeepSeek). User question: ${q}`;
+        let answer='';
+        await callModel(activeKeyModel,supPrompt,tok=>{answer=tok;loadingDiv.innerHTML=`<b>Support Bot:</b> ${answer.replace(/</g,'&lt;').replace(/\n/g,'<br>')}`;chatBox.scrollTop=chatBox.scrollHeight},new AbortController().signal);
+      }catch(err){
+        loadingDiv.innerHTML=`<b>Support Bot:</b> Check our Quick Help tab or contact support to send us a ticket!`;
+      }
+    }else{
+      setTimeout(()=>addChatMsg('Support Bot','Tip: Open /admin to configure your Gemini key. Or use the "Contact Support" tab to submit a ticket.'),350);
+    }
+  };
+  if(chatSend)chatSend.onclick=handleSupportAi;
+  if(chatIn)chatIn.onkeydown=e=>{if(e.key==='Enter')handleSupportAi()};
+
+  const supSubmit=$('#tSubmit'), supStatus=$('#tStatus');
+  if(supSubmit){
+    supSubmit.onclick=async()=>{
+      const name=($('#tName')?.value||'').trim();
+      const email=($('#tEmail')?.value||'').trim();
+      const msg=($('#tMsg')?.value||'').trim();
+      if(!msg)return alert('Please enter a description before sending.');
+      supSubmit.disabled=true;supSubmit.textContent='Sending...';
+      try{
+        const res=await fetch('/api/support',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({name,email,topic:'General',message:msg})});
+        const data=await res.json();
+        if(supStatus){
+          supStatus.className='text-center pt-2 font-medium text-emerald-400';
+          supStatus.textContent=`✓ Ticket ${data.id||'#'+Date.now().toString(36).slice(-4).toUpperCase()} received! We will be in touch.`;
+          supStatus.classList.remove('hidden');
+        }
+        if($('#tMsg'))$('#tMsg').value='';
+      }catch(err){
+        if(supStatus){
+          supStatus.className='text-center pt-2 font-medium text-emerald-400';
+          supStatus.textContent=`✓ Ticket #${Date.now().toString(36).slice(-4).toUpperCase()} logged!`;
+          supStatus.classList.remove('hidden');
+        }
+        if($('#tMsg'))$('#tMsg').value='';
+      }finally{
+        supSubmit.disabled=false;supSubmit.textContent='Send Support Ticket';
+        setTimeout(()=>{if(supStatus)supStatus.classList.add('hidden')},6000);
+      }
+    };
+  }
+}
+
+/* ---------- Spotify Control Tab & Persistent Embed ---------- */
+let currentSpotifyUri = localStorage.getItem('koda_spotify_uri') || 'playlist/4mEolujDpYfQbVfyPbDjpw';
+let currentSpotifyName = localStorage.getItem('koda_spotify_name') || 'Background Music';
+let isSpotifyExpanded = localStorage.getItem('koda_spotify_size') === '352';
+
+function getStoredSpotifyUri() { return currentSpotifyUri; }
+function getStoredSpotifyName() { return currentSpotifyName; }
+
+function mountSpotifyEmbed(target) {
+  const host = $('#spotifyEmbedHost');
+  if (!host) return;
+  if (target === 'workspace') {
+    const slot = $('#spotifyWsEmbedSlot');
+    if (slot && host.parentElement !== slot) slot.appendChild(host);
+  } else {
+    const slot = $('#spotifyModalEmbedSlot');
+    if (slot && host.parentElement !== slot) slot.appendChild(host);
+  }
+}
+
+function setSpotifyUri(uri, name) {
+  currentSpotifyUri = (uri || '').replace(/^spotify:/, '').replace(/^\/+/, '');
+  currentSpotifyName = name || 'Spotify Flow';
+  localStorage.setItem('koda_spotify_uri', currentSpotifyUri);
+  localStorage.setItem('koda_spotify_name', currentSpotifyName);
+
+  const iframe = $('#spotifyIframe');
+  const isUserPlaylist = currentSpotifyUri.includes('4mEolujDpYfQbVfyPbDjpw');
+  const embedUrl = isUserPlaylist
+    ? `https://open.spotify.com/embed/playlist/4mEolujDpYfQbVfyPbDjpw?utm_source=generator&theme=0&pt=2e74bb711395907d9560c221c11f56c5`
+    : `https://open.spotify.com/embed/${currentSpotifyUri}?utm_source=generator&theme=0`;
+  if (iframe && (!iframe.src || !String(iframe.src).includes(currentSpotifyUri))) {
+    iframe.src = embedUrl;
+  }
+
+  const l1 = $('#spotifyActiveLabel'); if (l1) l1.textContent = currentSpotifyName;
+  const l2 = $('#spotifyWsActiveLabel'); if (l2) l2.textContent = currentSpotifyName;
+  const pt = $('#spotifyPillTitle'); if (pt) pt.textContent = currentSpotifyName;
+
+  document.querySelectorAll('.sp-preset').forEach(b => {
+    b.classList.toggle('on', b.dataset.uri === currentSpotifyUri || (b.getAttribute('onclick')||'').includes(currentSpotifyUri));
+  });
+}
+
+function toggleSpotifySize() {
+  const iframe = $('#spotifyIframe');
+  if (!iframe) return;
+  isSpotifyExpanded = iframe.height === '152';
+  const newH = isSpotifyExpanded ? '352' : '152';
+  iframe.height = newH;
+  localStorage.setItem('koda_spotify_size', newH);
+  const btn1 = $('#spotifySizeToggle'); if (btn1) btn1.textContent = isSpotifyExpanded ? 'Compact View' : 'Expand View';
+  const btn2 = $('#spotifyWsSizeToggle'); if (btn2) btn2.textContent = isSpotifyExpanded ? 'Compact View' : 'Expand View';
+}
+
+function openActiveInSpotify() {
+  if (currentSpotifyUri.includes('4mEolujDpYfQbVfyPbDjpw')) {
+    window.open('https://open.spotify.com/playlist/4mEolujDpYfQbVfyPbDjpw?si=Sug6bYjjT5yUHmaVI0rEsw&utm_source=whatsapp&pt=2e74bb711395907d9560c221c11f56c5', '_blank');
+  } else {
+    window.open(`https://open.spotify.com/${currentSpotifyUri}`, '_blank');
+  }
+}
+
+function parseSpotifyInput(raw) {
+  raw = (raw || '').trim();
+  if (!raw) return null;
+  const regex = /(?:open\.spotify\.com(?:\/intl-[a-z]{2,5})?\/|spotify:)(track|playlist|album|artist|show|episode)[:/]([A-Za-z0-9]+)/;
+  const match = raw.match(regex);
+  if (match) {
+    const kind = match[1];
+    const id = match[2];
+    const name = `Custom ${kind.charAt(0).toUpperCase() + kind.slice(1)}`;
+    return { uri: `${kind}/${id}`, name };
+  }
+  if (/^[a-z]+\/[A-Za-z0-9]+$/.test(raw)) {
+    return { uri: raw, name: 'Custom Spotify' };
+  }
+  return null;
+}
+
+function handleTabCustomLoad() {
+  const inp = $('#spotifyTabInput');
+  if (!inp) return;
+  const parsed = parseSpotifyInput(inp.value);
+  if (parsed) {
+    setSpotifyUri(parsed.uri, parsed.name);
+    inp.value = '';
+  } else {
+    alert('Please paste a valid Spotify track, playlist, or album link.');
+  }
+}
+
+function handleModalCustomLoad() {
+  const inp = $('#spotifyCustomUrl');
+  if (!inp) return;
+  const parsed = parseSpotifyInput(inp.value);
+  if (parsed) {
+    setSpotifyUri(parsed.uri, parsed.name);
+    inp.value = '';
+  } else {
+    alert('Please paste a valid Spotify track, playlist, or album link.');
+  }
+}
+
+function openSpotifyModal() {
+  const m = $('#spotifyModal');
+  const pill = $('#spotifyFloatingPill');
+  if (m) { m.classList.remove('hidden'); lockBodyScroll(true); }
+  if (pill) pill.classList.add('hidden');
+  mountSpotifyEmbed('modal');
+}
+
+function closeSpotifyModal() {
+  const m = $('#spotifyModal');
+  if (m) { m.classList.add('hidden'); lockBodyScroll(false); }
+}
+
+function minimizeSpotifyModal() {
+  const m = $('#spotifyModal');
+  const pill = $('#spotifyFloatingPill');
+  if (m) { m.classList.add('hidden'); lockBodyScroll(false); }
+  if (pill) pill.classList.remove('hidden');
+}
+
+function renderSpotifyWorkspaceCard() {
+  return `<section class="card flex flex-col p-5 md:p-6" id="c-spotify">
+    <div class="flex items-center justify-between pb-3 mb-4 border-b border-white/10 flex-wrap gap-2">
+      <div class="flex items-center gap-2.5">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="#1db954"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.498 17.306c-.218.358-.684.47-1.042.252-2.855-1.744-6.45-2.14-10.684-1.173-.41.093-.815-.164-.908-.573-.093-.41.164-.816.574-.908 4.637-1.06 8.604-.61 11.808 1.35.358.218.47.684.252 1.052zm1.468-3.26c-.274.446-.86.588-1.306.314-3.268-2.008-8.25-2.59-12.114-1.417-.497.15-1.026-.135-1.176-.632-.15-.497.135-1.026.632-1.176 4.414-1.34 9.907-.692 13.65 1.605.446.274.588.86.314 1.306zm.135-3.394c-3.92-2.328-10.38-2.543-14.135-1.403-.6.182-1.24-.163-1.422-.763-.182-.6.163-1.24.763-1.422 4.314-1.31 11.443-1.06 15.932 1.604.54.32.716 1.022.396 1.562-.32.54-1.022.716-1.562.396z"/></svg>
+        <b class="text-white text-sm">Spotify Workspace Tab</b>
+        <span class="text-xs font-mono px-2.5 py-0.5 rounded-[10px] bg-white/10 text-white" id="spotifyWsActiveLabel">${currentSpotifyName}</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <button type="button" class="btn !py-1 !px-2.5 text-xs" id="spotifyWsSizeToggle" onclick="toggleSpotifySize()">${isSpotifyExpanded ? 'Compact View' : 'Expand View'}</button>
+        <button type="button" class="btn !py-1 !px-2.5 text-xs" onclick="openActiveInSpotify()">Open in App</button>
+      </div>
+    </div>
+
+    <!-- Presets -->
+    <div class="mb-4">
+      <div class="text-xs text-[#8e94a0] mb-2 font-mono">Curated Flow Presets:</div>
+      <div class="flex flex-wrap gap-2 text-xs">
+        <button type="button" class="btn !py-1.5 !px-3 sp-preset ${currentSpotifyUri==='playlist/4mEolujDpYfQbVfyPbDjpw'?'on':''}" onclick="setSpotifyUri('playlist/4mEolujDpYfQbVfyPbDjpw','Background Music')">Background Music</button>
+        <button type="button" class="btn !py-1.5 !px-3 sp-preset ${currentSpotifyUri==='playlist/37i9dQZF1DXcBWIGoYBM5M'?'on':''}" onclick="setSpotifyUri('playlist/37i9dQZF1DXcBWIGoYBM5M','Lofi Study')">Lofi Study</button>
+        <button type="button" class="btn !py-1.5 !px-3 sp-preset ${currentSpotifyUri==='playlist/37i9dQZF1DWZeKCadgRdKQ'?'on':''}" onclick="setSpotifyUri('playlist/37i9dQZF1DWZeKCadgRdKQ','Deep Focus')">Deep Focus</button>
+        <button type="button" class="btn !py-1.5 !px-3 sp-preset ${currentSpotifyUri==='playlist/37i9dQZF1DXdLEN7aqioXM'?'on':''}" onclick="setSpotifyUri('playlist/37i9dQZF1DXdLEN7aqioXM','Synthwave')">Synthwave</button>
+        <button type="button" class="btn !py-1.5 !px-3 sp-preset ${currentSpotifyUri==='playlist/37i9dQZF1DX4t95PaoR1T0'?'on':''}" onclick="setSpotifyUri('playlist/37i9dQZF1DX4t95PaoR1T0','Chill Beats')">Chill Beats</button>
+        <button type="button" class="btn !py-1.5 !px-3 sp-preset ${currentSpotifyUri==='playlist/37i9dQZF1DX3Ogo9pFvBkY'?'on':''}" onclick="setSpotifyUri('playlist/37i9dQZF1DX3Ogo9pFvBkY','Ambient Isolation')">Ambient Isolation</button>
+        <button type="button" class="btn !py-1.5 !px-3 sp-preset ${currentSpotifyUri==='playlist/37i9dQZF1DX2Nc3B70tvx0'?'on':''}" onclick="setSpotifyUri('playlist/37i9dQZF1DX2Nc3B70tvx0','Coding Flow')">Coding Flow</button>
+        <button type="button" class="btn !py-1.5 !px-3 sp-preset ${currentSpotifyUri==='playlist/37i9dQZF1DWVFeELeFFMdo'?'on':''}" onclick="setSpotifyUri('playlist/37i9dQZF1DWVFeELeFFMdo','Classical Focus')">Classical Focus</button>
+      </div>
+    </div>
+
+    <!-- Custom URL Input -->
+    <div class="mb-4">
+      <div class="text-xs text-[#8e94a0] mb-1.5 font-mono">Custom Spotify Link or URI:</div>
+      <div class="flex items-center gap-2">
+        <input type="text" id="spotifyTabInput" placeholder="open.spotify.com/playlist/... or spotify:track:..." class="flex-1 text-xs font-mono !py-2 !px-3 rounded-[10px] bg-transparent border border-white/20 text-white placeholder-[#646a78]">
+        <button type="button" class="solid-btn !py-2 !px-4 text-xs font-bold whitespace-nowrap" onclick="handleTabCustomLoad()">Load Music</button>
+      </div>
+    </div>
+
+    <!-- Live Embed Slot inside Workspace -->
+    <div class="overflow-hidden rounded-[12px] border border-white/10" id="spotifyWsEmbedSlot"></div>
+  </section>`;
+}
+
+function initSpotify() {
+  const modal = $('#spotifyModal');
+  const pill = $('#spotifyFloatingPill');
+  const navBtn = $('#navSpotifyBtn');
+  const wsBtn = $('#wsSpotifyBtn');
+  const closeBtn = $('#spotifyCloseBtn');
+  const miniBtn = $('#spotifyMinimizeBtn');
+  const pillExpand = $('#spotifyPillExpand');
+  const pillClose = $('#spotifyPillClose');
+  const iframe = $('#spotifyIframe');
+  const sizeToggle = $('#spotifySizeToggle');
+  const externalBtn = $('#spotifyExternalBtn');
+  const customUrl = $('#spotifyCustomUrl');
+  const loadUrlBtn = $('#spotifyLoadUrlBtn');
+
+  if (navBtn) navBtn.onclick = (e) => { e.preventDefault(); (modal && !modal.classList.contains('hidden')) ? closeSpotifyModal() : openSpotifyModal(); };
+  if (wsBtn) wsBtn.onclick = (e) => {
+    e.preventDefault();
+    if (S.view === 'tab') {
+      S.tab = 'spotify';
+      render();
+    } else {
+      openSpotifyModal();
+    }
+  };
+
+  if (closeBtn) closeBtn.onclick = closeSpotifyModal;
+  if (miniBtn) miniBtn.onclick = minimizeSpotifyModal;
+  if (pillExpand) pillExpand.onclick = openSpotifyModal;
+  if (pillClose) pillClose.onclick = () => { if (pill) pill.classList.add('hidden'); };
+
+  if (sizeToggle) sizeToggle.onclick = toggleSpotifySize;
+  if (externalBtn) externalBtn.onclick = openActiveInSpotify;
+  if (loadUrlBtn) loadUrlBtn.onclick = handleModalCustomLoad;
+  if (customUrl) customUrl.onkeydown = (e) => { if (e.key === 'Enter') handleModalCustomLoad(); };
+
+  // Preset buttons inside modal
+  const modalPresets = $('#spotifyModalPresets');
+  if (modalPresets) {
+    modalPresets.querySelectorAll('.sp-preset').forEach(b => {
+      b.onclick = () => setSpotifyUri(b.dataset.uri, b.dataset.name);
+    });
+  }
+
+  // Restore stored size and state
+  if (iframe) {
+    iframe.height = isSpotifyExpanded ? '352' : '152';
+    if (sizeToggle) sizeToggle.textContent = isSpotifyExpanded ? 'Compact View' : 'Expand View';
+  }
+  setSpotifyUri(currentSpotifyUri, currentSpotifyName);
+}
+
+(function(){const b=$('#mic');if(!b)return;if(!SR&&!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia&&window.MediaRecorder)){b.disabled=true;b.style.opacity='.4';b.title='Voice input is not supported in this browser. Try Chrome, Edge or Safari.';return}b.onclick=toggleMic})();
+/* ---------- Universal Direct Website App Installation Engine ---------- */
+let deferredInstallPrompt = null;
+let userRequestedInstall = false;
+
+// Note: Service worker lifecycle & auto-update polling is orchestrated by /update-manager.js
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  console.log('[Koda PWA] Native beforeinstallprompt captured.');
+  
+  const sub = document.getElementById('installBannerSub');
+  if (sub) sub.textContent = 'Tap to install directly from website';
+
+  if (userRequestedInstall) {
+    userRequestedInstall = false;
+    promptNativePwa();
+  }
+});
+
+window.addEventListener('appinstalled', () => {
+  console.log('[Koda PWA] App installed successfully.');
+  dismissInstallBanner();
+  $('#unifiedInstallBtn')?.classList.add('hidden');
+  closeAndroidModal();
+  closeIosModal();
+  closeMacModal();
+});
+
+async function triggerDirectAppInstall() {
+  userRequestedInstall = true;
+
+  // Modern browsers require HTTPS (or localhost) to allow native PWA app installation
+  const isInsecureRemote = location.protocol === 'http:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1';
+  if (isInsecureRemote) {
+    const httpsUrl = 'https://camping-dome-baltimore-mouth.trycloudflare.com';
+    const switchConfirmed = confirm('Modern mobile browsers require a Secure HTTPS connection to install apps directly to your home screen.\n\nTap OK to switch to the Secure HTTPS link:');
+    if (switchConfirmed) {
+      window.location.href = httpsUrl;
+    }
+    return;
+  }
+
+  if (deferredInstallPrompt) {
+    userRequestedInstall = false;
+    promptNativePwa();
+    return;
+  }
+
+  if (isIOS) {
+    openIosModal();
+    return;
+  }
+
+  if (isMac) {
+    openMacModal();
+    return;
+  }
+
+  if (isAndroid) {
+    openAndroidModal();
+    return;
+  }
+
+  alert('To install Koda on your computer: Click the Install icon (⊕) in the right side of your browser address bar.');
+}
+
+async function promptNativePwa() {
+  if (!deferredInstallPrompt) return;
+  try {
+    deferredInstallPrompt.prompt();
+    const choice = await deferredInstallPrompt.userChoice;
+    console.log('[Koda PWA] User choice:', choice.outcome);
+    if (choice.outcome === 'accepted') {
+      dismissInstallBanner();
+      $('#unifiedInstallBtn')?.classList.add('hidden');
+      closeAndroidModal();
+    }
+  } catch (err) {
+    console.error('PWA prompt error:', err);
+  } finally {
+    deferredInstallPrompt = null;
+  }
+}
+
+async function triggerAndroidPwaInstall() {
+  const isInsecureRemote = location.protocol === 'http:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1';
+  if (isInsecureRemote) {
+    const httpsUrl = 'https://camping-dome-baltimore-mouth.trycloudflare.com';
+    window.location.href = httpsUrl;
+    return;
+  }
+
+  if (deferredInstallPrompt) {
+    promptNativePwa();
+  } else {
+    alert('Direct installation on Android:\n\n1. In Chrome, Edge, or Samsung Internet, tap the 3 dots (⋮) in the top right.\n2. Tap "Install app" (or "Add to Home screen").\n3. Tap "Install". Koda will install directly as an app!');
+  }
+}
+
+function dismissInstallBanner() {
+  const b = document.getElementById('directInstallBanner');
+  if (b) b.classList.add('hidden');
+  try { sessionStorage.setItem('koda_banner_dismissed', 'true'); } catch (_) {}
+}
+
+/* ---------- iOS App Detection & Installation ---------- */
+function openIosModal() {
+  const m = $('#iosModal');
+  if (m) { m.classList.remove('hidden'); lockBodyScroll(true); }
+}
+
+function closeIosModal() {
+  const m = $('#iosModal');
+  if (m) { m.classList.add('hidden'); lockBodyScroll(false); }
+}
+
+(function initPlatformApp() {
+  const isStandalone = !!(window.navigator && window.navigator.standalone) || !!(window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+  if (isStandalone) {
+    $('#unifiedInstallBtn')?.classList.add('hidden');
+    dismissInstallBanner();
+    return;
+  }
+
+  const dismissed = (function() { try { return sessionStorage.getItem('koda_banner_dismissed') === 'true'; } catch(_) { return false; } })();
+  const banner = document.getElementById('directInstallBanner');
+  if (banner && !dismissed) {
+    banner.classList.remove('hidden');
+  }
+
+  const btnText = document.getElementById('unifiedInstallBtnText');
+  if (btnText) {
+    if (isAndroid) btnText.textContent = 'Install Android App';
+    else if (isIOS) btnText.textContent = 'Install iOS App';
+    else if (isMac) btnText.textContent = 'Install Mac App';
+    else btnText.textContent = 'Install App';
+  }
+})();
+
+/* ---------- Real-Time Multi-Device Sync & Live Server Auto-Updates ---------- */
+let currentBuildId = ls('koda_build_id', null);
+let syncEventSource = null;
+
+function showUpdateBanner(msg) {
+  let b = document.getElementById('kodaUpdateBanner');
+  if (!b) {
+    b = document.createElement('div');
+    b.id = 'kodaUpdateBanner';
+    b.className = 'fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2 bg-white text-black font-semibold text-xs rounded-full shadow-2xl flex items-center gap-2 border border-black/20 animate-pulse';
+    document.body.appendChild(b);
+  }
+  b.innerHTML = '<span class="w-2 h-2 rounded-full bg-black"></span><span>' + msg + '</span>';
+  setTimeout(() => {
+    if (window.caches) {
+      caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))).catch(() => {});
+    }
+    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage({ action: 'skipWaiting' });
+    }
+    const cleanUrl = window.location.origin + window.location.pathname + '?v=' + Date.now();
+    window.location.replace(cleanUrl);
+  }, 1000);
+}
+
+function broadcastRunToServer(run) {
+  if (!run || !/^https?:$/.test(location.protocol) || location.hostname.endsWith('github.io')) return;
+  fetch('./api/sync/broadcast', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ type: 'SYNC_RUN', senderSid: TR.sid, run })
+  }).catch(() => {});
+}
+
+function broadcastClearToServer() {
+  if (!/^https?:$/.test(location.protocol) || location.hostname.endsWith('github.io')) return;
+  fetch('./api/sync/broadcast', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ type: 'CLEAR_HISTORY', senderSid: TR.sid })
+  }).catch(() => {});
+}
+
+function initLiveSync() {
+  if (!/^https?:$/.test(location.protocol) || location.hostname.endsWith('github.io')) return;
+  if (syncEventSource) {
+    try { syncEventSource.close(); } catch (_) {}
+  }
+
+  try {
+    syncEventSource = new EventSource('./api/sync/stream');
+
+    syncEventSource.onmessage = (e) => {
+      try {
+        const data = JSON.parse(e.data);
+        if (!data || !data.type) return;
+
+        if (data.type === 'INIT') {
+          if (currentBuildId && data.buildId && data.buildId !== currentBuildId) {
+            currentBuildId = data.buildId;
+            sv('koda_build_id', currentBuildId);
+            showUpdateBanner('New version detected! Updating device...');
+            return;
+          }
+          currentBuildId = data.buildId;
+          sv('koda_build_id', currentBuildId);
+          const countEl = document.getElementById('syncDeviceCount');
+          if (countEl) countEl.textContent = (data.devicesCount || 1) + ((data.devicesCount === 1) ? ' device' : ' devices') + ' synced';
+          
+          if ((!S.hist || !S.hist.length) && data.state && data.state.history && data.state.history.length) {
+            S.hist = data.state.history;
+            sv('hub_hist', S.hist);
+            if (!S.cur && data.state.current) S.cur = data.state.current;
+            render();
+            renderHist();
+          }
+        } else if (data.type === 'DEVICES_COUNT') {
+          const countEl = document.getElementById('syncDeviceCount');
+          if (countEl) countEl.textContent = (data.count || 1) + ((data.count === 1) ? ' device' : ' devices') + ' synced';
+        } else if (data.type === 'APP_UPDATE') {
+          if (data.force || (data.buildId && data.buildId !== currentBuildId)) {
+            currentBuildId = data.buildId;
+            sv('koda_build_id', currentBuildId);
+            showUpdateBanner('Server update detected! Syncing latest version to device...');
+          }
+        } else if (data.type === 'SYNC_RUN' && data.run) {
+          if (data.senderSid !== TR.sid) {
+            const incoming = data.run;
+            S.cur = incoming;
+            const existingIdx = S.hist.findIndex(h => h.id === incoming.id || (h.prompt === incoming.prompt && Math.abs(new Date(h.ts) - new Date(incoming.ts)) < 2500));
+            if (existingIdx >= 0) {
+              S.hist[existingIdx] = incoming;
+            } else {
+              S.hist.unshift(incoming);
+            }
+            S.hist = S.hist.slice(0, 30);
+            sv('hub_hist', S.hist);
+            render();
+            renderHist();
+            if (incoming.synth && $('#synth')) {
+              $('#synth').innerHTML = `<div class="panel p-4"><div class="font-bold text-white text-sm mb-2">Synthesis</div><div class="md text-sm">${md(incoming.synth)}</div></div>`;
+            }
+            if (typeof showVoiceToast === 'function') {
+              showVoiceToast('⚡ Live Sync: Updated from connected device');
+            }
+          }
+        } else if (data.type === 'CLEAR_HISTORY') {
+          if (data.senderSid !== TR.sid) {
+            S.cur = null;
+            S.hist = [];
+            sv('hub_hist', []);
+            if ($('#synth')) $('#synth').innerHTML = '';
+            render();
+            renderHist();
+          }
+        }
+      } catch (_) {}
+    };
+
+    syncEventSource.onerror = () => {
+      if (syncEventSource) {
+        try { syncEventSource.close(); } catch (_) {}
+      }
+      setTimeout(initLiveSync, 4000);
+    };
+  } catch (_) {
+    setTimeout(initLiveSync, 5000);
+  }
+}
+
+async function checkLatestVersion() {
+  if (!/^https?:$/.test(location.protocol) || location.hostname.endsWith('github.io')) return;
+  try {
+    const res = await fetch('./api/sync/state?t=' + Date.now(), { cache: 'no-store' });
+    const ct = res.headers.get('content-type') || '';
+    if (!res.ok || !ct.includes('application/json')) return;
+    const data = await res.json();
+    if (data && data.buildId) {
+      if (currentBuildId && data.buildId !== currentBuildId) {
+        currentBuildId = data.buildId;
+        sv('koda_build_id', currentBuildId);
+        showUpdateBanner('Latest version detected! Updating device...');
+      } else {
+        currentBuildId = data.buildId;
+        sv('koda_build_id', currentBuildId);
+      }
+    }
+  } catch (_) {}
+}
+
+/* Background & Sleep Recovery on iOS Safari / macOS / Mobile (reconnect instantly on unlock) */
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    checkLatestVersion();
+    if (!syncEventSource || syncEventSource.readyState === EventSource.CLOSED) {
+      initLiveSync();
+    }
+  }
+});
+window.addEventListener('pageshow', (e) => {
+  checkLatestVersion();
+  if (e.persisted || !syncEventSource || syncEventSource.readyState === EventSource.CLOSED) {
+    initLiveSync();
+  }
+});
+setInterval(checkLatestVersion, 30000);
+
+render();initGoogle();initSupport();initSpotify();initLiveSync();initIosViewportHandling();checkLatestVersion();
+</script>
+<noscript><p style="padding:24px">Koda needs JavaScript enabled to run.</p></noscript>
+</body>
+</html>

@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Profiles & Accounts — Koda</title>
+<meta name="description" content="Manage your Koda profile, view and switch between accounts, and configure workspace settings.">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Koda">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Themes Engine (Strictly Pure AMOLED & Light Mode) -->
+<link rel="stylesheet" href="theme-styles.css">
+<script src="theme-manager.js"></script>
+
+<style>
+:root {
+  --bg: #000000;
+  --bg-secondary: #000000;
+  --panel: #0a0a0a;
+  --card-bg: #0d0d0d;
+  --card-header: #050505;
+  --border: rgba(255, 255, 255, 0.22);
+  --border-muted: rgba(255, 255, 255, 0.10);
+  --border-focus: #ffffff;
+  --text: #f5f5f5;
+  --text-muted: #888888;
+  --text-heading: #ffffff;
+  --accent: #ffffff;
+  --accent-secondary: #d4d4d4;
+  --accent-hover: #e5e5e5;
+  --accent-text: #000000;
+  --btn-bg: rgba(255, 255, 255, 0.08);
+  --btn-hover: rgba(255, 255, 255, 0.16);
+  --btn-border: rgba(255, 255, 255, 0.25);
+  --btn-text: #ffffff;
+  --solid-btn-bg: #ffffff;
+  --solid-btn-text: #000000;
+  --input-bg: #000000;
+  --input-border: rgba(255, 255, 255, 0.25);
+  --input-text: #ffffff;
+  --nav-bg: rgba(0, 0, 0, 0.96);
+}
+html.light {
+  --bg: #f8fafc;
+  --bg-secondary: #f1f5f9;
+  --panel: #ffffff;
+  --card-bg: #ffffff;
+  --card-header: #f8fafc;
+  --border: rgba(0, 0, 0, 0.12);
+  --border-muted: rgba(0, 0, 0, 0.07);
+  --border-focus: #0f172a;
+  --text: #0f172a;
+  --text-muted: #64748b;
+  --text-heading: #0f172a;
+  --accent: #0f172a;
+  --accent-secondary: #334155;
+  --accent-hover: #1e293b;
+  --accent-text: #ffffff;
+  --btn-bg: #ffffff;
+  --btn-hover: #f1f5f9;
+  --btn-border: #cbd5e1;
+  --btn-text: #0f172a;
+  --solid-btn-bg: #0f172a;
+  --solid-btn-text: #ffffff;
+  --input-bg: #ffffff;
+  --input-border: #cbd5e1;
+  --input-text: #0f172a;
+  --nav-bg: rgba(248, 250, 252, 0.96);
+}
+body {
+  font-family: 'Bricolage Grotesque', system-ui, -apple-system, sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0;
+  padding: 0;
+}
+.panel {
+  background-color: var(--panel);
+  border-color: var(--border);
+}
+.card {
+  background-color: var(--card-bg);
+  border-color: var(--border);
+}
+.btn {
+  background: var(--btn-bg);
+  color: var(--btn-text);
+  border: 1px solid var(--btn-border);
+  transition: all 0.15s ease;
+}
+.btn:hover {
+  background: var(--btn-hover);
+}
+.solid-btn {
+  background: var(--solid-btn-bg);
+  color: var(--solid-btn-text);
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+}
+.solid-btn:hover {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+input, select {
+  background: var(--input-bg);
+  color: var(--input-text);
+  border: 1px solid var(--input-border);
+}
+input:focus, select:focus {
+  outline: none;
+  border-color: var(--border-focus);
+}
+.font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+</style>
+</head>
+<body class="selection:bg-white/20 selection:text-white">
+
+<!-- Top Navigation Bar -->
+<header class="sticky top-0 z-40 w-full backdrop-blur-md border-b" style="background-color: var(--nav-bg); border-color: var(--border);">
+  <div class="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
+    <!-- Brand / Back -->
+    <div class="flex items-center gap-3">
+      <a id="linkHome" href="chat.html" class="flex items-center gap-2 group">
+        <div class="w-8 h-8 rounded-xl bg-white text-black flex items-center justify-center font-bold text-base shadow-sm group-hover:scale-105 transition">
+          K
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span class="font-bold text-base tracking-tight text-[var(--text-heading)]">Koda</span>
+          <span class="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full border border-white/20 text-[var(--text-muted)]">Accounts</span>
+        </div>
+      </a>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex items-center gap-2">
+      <!-- Back to Workspace -->
+      <a id="btnBackToWorkspace" href="chat.html" class="btn !py-1.5 !px-3 text-xs font-semibold rounded-lg flex items-center gap-1.5 cursor-pointer" title="Return to Multi-Model Workspace">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        <span>Workspace</span>
+      </a>
+
+      <!-- Quick Theme Toggle (Pure AMOLED / Light Mode) -->
+      <button type="button" id="themeToggle" onclick="window.toggleTheme()" class="btn !p-2 rounded-lg cursor-pointer" title="Toggle Pure AMOLED / Light Mode">
+        <svg id="themeIconSun" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        <svg id="themeIconMoon" class="hidden" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+
+      <!-- Sign Out -->
+      <button type="button" onclick="logoutCurrentAccount()" class="btn !py-1.5 !px-3 text-xs text-[#ef4444] hover:!bg-red-500/10 hover:!border-red-500/30 rounded-lg flex items-center gap-1.5 cursor-pointer" title="Sign out of current account">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <span class="hidden sm:inline">Sign out</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Main Container -->
+<main class="max-w-5xl mx-auto px-4 py-8 space-y-8">
+
+  <!-- Header Title -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--text-heading)]">Account & Profiles</h1>
+      <p class="text-xs sm:text-sm text-[var(--text-muted)] mt-1">Manage your active account, switch between workspace profiles, and configure security.</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <a id="btnNewAccount" href="login.html?mode=register&switch=1" class="solid-btn !py-2 !px-3.5 text-xs font-semibold rounded-lg flex items-center gap-1.5 shadow-sm">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span>+ Add Account</span>
+      </a>
+      <a id="btnSwitchAccount" href="login.html?switch=1" class="btn !py-2 !px-3.5 text-xs font-semibold rounded-lg flex items-center gap-1.5">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+        <span>Sign in to Another</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- SECTION 1: Active Profile Hero Card -->
+  <section class="card p-6 sm:p-7 rounded-2xl border shadow-lg relative overflow-hidden">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+      
+      <!-- Left: Avatar & Info -->
+      <div class="flex items-center gap-4 sm:gap-5">
+        <div class="relative">
+          <div id="heroAvatar" class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white/10 text-white flex items-center justify-center text-2xl sm:text-3xl font-extrabold border-2 border-white/20 shadow-inner overflow-hidden">
+            U
+          </div>
+          <span class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-[var(--card-bg)] shadow" title="Active Account"></span>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h2 id="heroName" class="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-heading)]">User</h2>
+            <span id="heroTypeBadge" class="px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">Active</span>
+          </div>
+          <p id="heroEmail" class="text-xs sm:text-sm text-[var(--text-muted)] font-mono mt-0.5">user@example.com</p>
+          
+          <div class="flex flex-wrap items-center gap-2 mt-3">
+            <!-- Account ID with Copy -->
+            <button type="button" onclick="copyAccountId()" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/5 hover:bg-white/10 border border-white/10 text-[11px] font-mono text-[var(--text-muted)] hover:text-white transition cursor-pointer" title="Click to copy Account ID">
+              <span id="heroAccountId">usr_...</span>
+              <svg id="copyIdIcon" viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            </button>
+            <span id="copyToast" class="hidden text-[11px] text-emerald-400 font-medium">Copied!</span>
+
+            <!-- Member Since -->
+            <span id="heroMemberSince" class="text-[11px] text-[var(--text-muted)]">Member since: Active Session</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Quick Actions -->
+      <div class="flex flex-wrap sm:flex-col items-center sm:items-end gap-2 w-full sm:w-auto pt-4 sm:pt-0 border-t sm:border-t-0 border-[var(--border-muted)]">
+        <a id="heroOpenWorkspaceBtn" href="chat.html" class="solid-btn w-full sm:w-auto !py-2 !px-4 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5">
+          <span>Open Workspace</span>
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+        <button type="button" onclick="focusEditProfile()" class="btn w-full sm:w-auto !py-2 !px-3 text-xs font-medium rounded-lg flex items-center justify-center gap-1.5 text-[var(--text-muted)] hover:text-white">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          <span>Edit Profile</span>
+        </button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- SECTION 2: Accounts Hub ("Look at my accounts" - Switcher) -->
+  <section class="space-y-4">
+    <div class="flex items-center justify-between">
+      <div>
+        <h2 class="text-lg font-bold tracking-tight text-[var(--text-heading)]">Your Accounts</h2>
+        <p class="text-xs text-[var(--text-muted)]">All accounts on this device. Click switch to jump between workspaces instantly.</p>
+      </div>
+      <span id="accountsCountBadge" class="text-xs px-2.5 py-0.5 rounded-full border border-white/10 text-[var(--text-muted)] font-mono">1 Account</span>
+    </div>
+
+    <!-- Accounts Cards Grid -->
+    <div id="accountsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+      <!-- Injected via JavaScript -->
+    </div>
+  </section>
+
+  <!-- SECTION 3: Profile Settings & Security (2 Columns) -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+    <!-- Card A: Personal Details -->
+    <section class="card p-6 rounded-2xl border space-y-4 flex flex-col justify-between" id="profileSettingsCard">
+      <div class="space-y-4">
+        <div class="flex items-center gap-2.5 pb-3 border-b border-[var(--border-muted)]">
+          <div class="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-[var(--text-muted)]">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-[var(--text-heading)]">Profile Information</h3>
+            <p class="text-[11px] text-[var(--text-muted)]">Update how your name appears across the workspace</p>
+          </div>
+        </div>
+
+        <!-- Alert Banner -->
+        <div id="nameAlert" class="hidden p-3 rounded-lg text-xs border"></div>
+
+        <form id="formUpdateName" onsubmit="handleUpdateName(event)" class="space-y-3.5">
+          <div>
+            <label class="block text-[11px] font-semibold text-[var(--text-muted)] mb-1 uppercase tracking-wider">Display Name</label>
+            <input type="text" id="inpDisplayName" required class="w-full px-3.5 py-2.5 text-xs rounded-xl" placeholder="Your Full Name">
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-[var(--text-muted)] mb-1 uppercase tracking-wider">Email Address</label>
+            <div class="relative">
+              <input type="email" id="inpDisplayEmail" readonly disabled class="w-full px-3.5 py-2.5 text-xs rounded-xl opacity-70 cursor-not-allowed font-mono" placeholder="email@example.com">
+              <span class="absolute right-3 top-2.5 text-[10px] text-emerald-400 font-semibold uppercase tracking-wider">Verified</span>
+            </div>
+            <p class="text-[10px] text-[var(--text-muted)] mt-1">Email is tied to your account credentials.</p>
+          </div>
+
+          <div class="pt-2">
+            <button type="submit" id="btnSaveName" class="solid-btn !py-2 !px-4 text-xs font-semibold rounded-lg flex items-center gap-1.5 cursor-pointer">
+              <span>Save Name</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- Card B: Security & Password -->
+    <section class="card p-6 rounded-2xl border space-y-4 flex flex-col justify-between">
+      <div class="space-y-4">
+        <div class="flex items-center gap-2.5 pb-3 border-b border-[var(--border-muted)]">
+          <div class="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-[var(--text-muted)]">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-[var(--text-heading)]">Security & Password</h3>
+            <p class="text-[11px] text-[var(--text-muted)]">Update your login password to keep your account safe</p>
+          </div>
+        </div>
+
+        <!-- Alert Banner -->
+        <div id="pwdAlert" class="hidden p-3 rounded-lg text-xs border"></div>
+
+        <div id="guestSecurityNotice" class="hidden p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs">
+          <b>Guest Account:</b> You are currently logged in with a guest session. Register an account with email and password to secure your chats across devices.
+        </div>
+
+        <form id="formUpdatePassword" onsubmit="handleUpdatePassword(event)" class="space-y-3.5">
+          <div>
+            <label class="block text-[11px] font-semibold text-[var(--text-muted)] mb-1 uppercase tracking-wider">Current Password</label>
+            <input type="password" id="inpCurrentPassword" required class="w-full px-3.5 py-2.5 text-xs rounded-xl" placeholder="Enter current password">
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-[var(--text-muted)] mb-1 uppercase tracking-wider">New Password</label>
+            <input type="password" id="inpNewPassword" minlength="4" required class="w-full px-3.5 py-2.5 text-xs rounded-xl" placeholder="At least 4 characters">
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-[var(--text-muted)] mb-1 uppercase tracking-wider">Confirm New Password</label>
+            <input type="password" id="inpConfirmPassword" minlength="4" required class="w-full px-3.5 py-2.5 text-xs rounded-xl" placeholder="Confirm new password">
+          </div>
+
+          <div class="pt-2">
+            <button type="submit" id="btnSavePassword" class="btn !py-2 !px-4 text-xs font-semibold rounded-lg flex items-center gap-1.5 cursor-pointer">
+              <span>Update Password</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- SECTION 4: Workspace Overview & Storage -->
+  <section class="card p-6 rounded-2xl border space-y-5">
+    <div class="flex items-center justify-between pb-3 border-b border-[var(--border-muted)]">
+      <div>
+        <h3 class="text-sm font-bold text-[var(--text-heading)]">Workspace & Storage</h3>
+        <p class="text-[11px] text-[var(--text-muted)]">Local device statistics and chat persistence</p>
+      </div>
+      <button type="button" onclick="exportUserData()" class="btn !py-1.5 !px-3 text-xs font-medium rounded-lg flex items-center gap-1.5">
+        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span>Export Data (JSON)</span>
+      </button>
+    </div>
+
+    <!-- Stat Tiles -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+      <div class="p-4 rounded-xl bg-white/5 border border-white/10 space-y-1">
+        <span class="text-[11px] text-[var(--text-muted)] font-medium">Saved Chats</span>
+        <div id="statChatsCount" class="text-xl font-extrabold text-[var(--text-heading)] font-mono">0</div>
+        <p class="text-[10px] text-[var(--text-muted)]">Conversations stored in local browser</p>
+      </div>
+
+      <div class="p-4 rounded-xl bg-white/5 border border-white/10 space-y-1">
+        <span class="text-[11px] text-[var(--text-muted)] font-medium">Parallel AI Engines</span>
+        <div class="text-xl font-extrabold text-[var(--text-heading)] font-mono">6 Engines</div>
+        <p class="text-[10px] text-[var(--text-muted)]">Koda, ChatGPT, Claude, Gemini, Perplexity, DeepSeek</p>
+      </div>
+
+      <div class="p-4 rounded-xl bg-white/5 border border-white/10 space-y-1">
+        <span class="text-[11px] text-[var(--text-muted)] font-medium">Active Theme</span>
+        <div id="statCurrentTheme" class="text-xl font-extrabold text-[var(--text-heading)]">Pure AMOLED</div>
+        <p class="text-[10px] text-[var(--text-muted)]">Ultra-high contrast OLED styling</p>
+      </div>
+    </div>
+
+    <!-- Danger Actions -->
+    <div class="pt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--border-muted)]">
+      <div class="text-xs text-[var(--text-muted)]">
+        Manage local caches and storage for this browser instance.
+      </div>
+      <div class="flex items-center gap-2">
+        <button type="button" onclick="clearLocalChats()" class="btn !py-1.5 !px-3 text-xs text-[#ef4444] hover:!bg-red-500/10 hover:!border-red-500/30 rounded-lg cursor-pointer">
+          Clear Chat Cache
+        </button>
+        <button type="button" onclick="logoutAllAccounts()" class="btn !py-1.5 !px-3 text-xs text-[#ef4444] hover:!bg-red-500/10 hover:!border-red-500/30 rounded-lg cursor-pointer">
+          Sign Out All Accounts
+        </button>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Page Logic -->
+<script>
+(function() {
+  'use strict';
+
+  // 1. Session Guard: Ensure user is logged in
+  const isFile = location.protocol === 'file:';
+  const isStaticHost = isFile || location.hostname.endsWith('github.io');
+  const loginUrl = 'login.html?redirect=profile.html';
+  const chatUrl = 'chat.html';
+
+  // Ensure navigation targets work universally (localhost, Vercel, GitHub Pages, file://)
+  document.getElementById('linkHome').href = chatUrl;
+  document.getElementById('btnBackToWorkspace').href = chatUrl;
+  document.getElementById('heroOpenWorkspaceBtn').href = chatUrl;
+  document.getElementById('btnNewAccount').href = 'login.html?mode=register&switch=1';
+  document.getElementById('btnSwitchAccount').href = 'login.html?switch=1';
+
+  let currentUser = null;
+  try {
+    const raw = localStorage.getItem('koda_user') || localStorage.getItem('hub_user');
+    if (raw) currentUser = JSON.parse(raw);
+  } catch (_) {}
+
+  if (!currentUser || (!currentUser.email && !currentUser.name && !currentUser.id)) {
+    window.location.replace(loginUrl);
+    return;
+  }
+
+  // 2. Render Hero Card
+  function renderHero() {
+    const name = currentUser.name || (currentUser.email ? currentUser.email.split('@')[0] : 'User');
+    const email = currentUser.email || 'No email associated (Guest)';
+    const id = currentUser.id || 'usr_local';
+    const isGuest = !!currentUser.isGuest;
+
+    document.getElementById('heroName').textContent = name;
+    document.getElementById('heroEmail').textContent = email;
+    document.getElementById('heroAccountId').textContent = id;
+
+    // Avatar
+    const avatarEl = document.getElementById('heroAvatar');
+    if (currentUser.picture) {
+      avatarEl.innerHTML = `<img src="${currentUser.picture}" class="w-full h-full object-cover">`;
+    } else {
+      const initial = (name || email).trim().charAt(0).toUpperCase();
+      avatarEl.textContent = initial || 'U';
+    }
+
+    // Badge
+    const badge = document.getElementById('heroTypeBadge');
+    if (isGuest) {
+      badge.textContent = 'Guest Session';
+      badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/30';
+      document.getElementById('guestSecurityNotice').classList.remove('hidden');
+      document.getElementById('formUpdatePassword').classList.add('opacity-40', 'pointer-events-none');
+    } else {
+      badge.textContent = 'Registered Account';
+      badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/30';
+      document.getElementById('guestSecurityNotice').classList.add('hidden');
+      document.getElementById('formUpdatePassword').classList.remove('opacity-40', 'pointer-events-none');
+    }
+
+    // Created At
+    if (currentUser.createdAt) {
+      try {
+        const d = new Date(currentUser.createdAt);
+        document.getElementById('heroMemberSince').textContent = 'Member since: ' + d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+      } catch (_) {}
+    }
+
+    // Inputs in Edit Card
+    document.getElementById('inpDisplayName').value = name;
+    document.getElementById('inpDisplayEmail').value = email;
+  }
+
+  // 3. Render Accounts Hub ("Look at my accounts")
+  async function loadAndRenderAccounts() {
+    const grid = document.getElementById('accountsGrid');
+    const badge = document.getElementById('accountsCountBadge');
+
+    // Gather accounts from server and local storage
+    let accountsList = [];
+
+    // Local saved accounts & browser static accounts
+    try {
+      const saved = JSON.parse(localStorage.getItem('koda_saved_accounts') || '[]');
+      if (Array.isArray(saved)) accountsList.push(...saved);
+    } catch (_) {}
+    try {
+      const staticAccs = JSON.parse(localStorage.getItem('koda_static_accounts') || '[]');
+      if (Array.isArray(staticAccs)) {
+        staticAccs.forEach(sa => {
+          if (!accountsList.some(a => a.email === sa.email)) {
+            accountsList.push({ id: sa.id, email: sa.email, name: sa.name, createdAt: sa.createdAt });
+          }
+        });
+      }
+    } catch (_) {}
+
+    // Add current user if not already in list
+    if (currentUser && currentUser.email) {
+      const exists = accountsList.some(a => a.email === currentUser.email);
+      if (!exists) {
+        accountsList.unshift({
+          id: currentUser.id || 'usr_' + Date.now().toString(36),
+          email: currentUser.email,
+          name: currentUser.name || currentUser.email.split('@')[0],
+          createdAt: currentUser.createdAt || Date.now()
+        });
+      }
+    }
+
+    // If running with Node/Vercel backend, fetch from server API
+    if (!isStaticHost && location.protocol.startsWith('http')) {
+      try {
+        const res = await fetch('./api/auth/accounts/list');
+        const ct = res.headers.get('content-type') || '';
+        if (res.ok && ct.includes('application/json')) {
+          const data = await res.json();
+          if (data.ok && Array.isArray(data.accounts)) {
+            data.accounts.forEach(srvAcc => {
+              const idx = accountsList.findIndex(a => a.email === srvAcc.email);
+              if (idx >= 0) {
+                accountsList[idx] = Object.assign({}, srvAcc, accountsList[idx]);
+              } else {
+                accountsList.push(srvAcc);
+              }
+            });
+          }
+        }
+      } catch (_) {}
+    }
+
+    // Ensure uniqueness by email
+    const uniqueMap = new Map();
+    accountsList.forEach(acc => {
+      const key = acc.email ? acc.email.toLowerCase() : acc.id;
+      if (!uniqueMap.has(key)) uniqueMap.set(key, acc);
+    });
+    const finalAccounts = Array.from(uniqueMap.values());
+
+    // Update count badge
+    if (badge) {
+      badge.textContent = finalAccounts.length + (finalAccounts.length === 1 ? ' Account' : ' Accounts');
+    }
+
+    // Render cards
+    if (finalAccounts.length === 0) {
+      grid.innerHTML = `
+        <div class="col-span-full p-6 text-center text-xs text-[var(--text-muted)] border border-dashed rounded-xl">
+          No accounts found. Use "+ Add Account" to connect an account.
+        </div>
+      `;
+      return;
+    }
+
+    grid.innerHTML = finalAccounts.map(acc => {
+      const isCurrent = currentUser && (
+        (currentUser.email && acc.email && currentUser.email.toLowerCase() === acc.email.toLowerCase()) ||
+        (currentUser.id && acc.id && currentUser.id === acc.id)
+      );
+      const initial = (acc.name || acc.email || 'U').trim().charAt(0).toUpperCase();
+
+      return `
+        <div class="card p-4 rounded-xl border flex items-center justify-between gap-3 ${isCurrent ? 'ring-1 ring-emerald-500/50 bg-emerald-500/[0.03]' : ''}">
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-10 h-10 rounded-xl bg-white/10 text-white flex items-center justify-center font-bold text-sm border border-white/15 flex-shrink-0">
+              ${initial}
+            </div>
+            <div class="min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-[var(--text-heading)] truncate">${acc.name || 'User'}</span>
+                ${isCurrent ? '<span class="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">Active Now</span>' : ''}
+              </div>
+              <p class="text-[11px] text-[var(--text-muted)] font-mono truncate">${acc.email || 'Local / Guest'}</p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1.5 flex-shrink-0">
+            ${isCurrent ? `
+              <a href="${chatUrl}" class="solid-btn !py-1 !px-2.5 text-[11px] font-semibold rounded-lg flex items-center gap-1">
+                <span>Workspace</span>
+              </a>
+            ` : `
+              <button type="button" onclick="switchToAccount('${acc.email || ''}')" class="btn !py-1 !px-2.5 text-[11px] font-semibold rounded-lg hover:text-white cursor-pointer" title="Switch to this account">
+                Switch
+              </button>
+              <button type="button" onclick="removeSavedAccount('${acc.email || acc.id}')" class="btn !p-1 text-[11px] text-[#ef4444] hover:!bg-red-500/10 rounded-lg cursor-pointer" title="Forget this account on device">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              </button>
+            `}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // 4. Update Workspace Stats
+  function updateStats() {
+    try {
+      const hist = JSON.parse(localStorage.getItem('hub_hist') || '[]');
+      const count = Array.isArray(hist) ? hist.length : 0;
+      document.getElementById('statChatsCount').textContent = count + (count === 1 ? ' chat' : ' chats');
+    } catch (_) {
+      document.getElementById('statChatsCount').textContent = '0 chats';
+    }
+
+    const theme = (localStorage.getItem('koda_theme_id') || 'amoled') === 'light' ? 'Light Mode' : 'Pure AMOLED';
+    document.getElementById('statCurrentTheme').textContent = theme;
+  }
+
+  // Initialize
+  renderHero();
+  loadAndRenderAccounts();
+  updateStats();
+
+  // Listen to theme changes to update stats
+  window.addEventListener('koda-theme-changed', (e) => {
+    updateStats();
+  });
+
+  // Global actions
+  window.copyAccountId = function() {
+    const id = currentUser?.id || 'usr_local';
+    navigator.clipboard.writeText(id).then(() => {
+      const toast = document.getElementById('copyToast');
+      if (toast) {
+        toast.classList.remove('hidden');
+        setTimeout(() => toast.classList.add('hidden'), 2000);
+      }
+    }).catch(() => {});
+  };
+
+  window.focusEditProfile = function() {
+    const inp = document.getElementById('inpDisplayName');
+    if (inp) {
+      inp.focus();
+      inp.select();
+    }
+  };
+
+  async function hashLocalPassword(pwd) {
+    try {
+      if (window.crypto && window.crypto.subtle) {
+        const buf = new TextEncoder().encode('koda_static_' + pwd);
+        const digest = await window.crypto.subtle.digest('SHA-256', buf);
+        return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+      }
+    } catch (_) {}
+    let h = 2166136261;
+    for (let i = 0; i < pwd.length; i++) {
+      h ^= pwd.charCodeAt(i);
+      h += (h << 1) + (h << 4) + (h << 7) + (h << 8) + (h << 24);
+    }
+    return 'h_' + (h >>> 0).toString(16);
+  }
+
+  window.switchToAccount = function(email) {
+    if (!email) return;
+    const loginTarget = 'login.html?switch=1&email=' + encodeURIComponent(email) + '&redirect=' + encodeURIComponent('chat.html');
+    window.location.href = loginTarget;
+  };
+
+  window.removeSavedAccount = function(identifier) {
+    if (!confirm('Remove this account from this device? (You can sign in again anytime).')) return;
+    try {
+      const saved = JSON.parse(localStorage.getItem('koda_saved_accounts') || '[]');
+      const filtered = saved.filter(a => a.email !== identifier && a.id !== identifier);
+      localStorage.setItem('koda_saved_accounts', JSON.stringify(filtered));
+      const staticAccs = JSON.parse(localStorage.getItem('koda_static_accounts') || '[]');
+      const filteredStatic = staticAccs.filter(a => a.email !== identifier && a.id !== identifier);
+      localStorage.setItem('koda_static_accounts', JSON.stringify(filteredStatic));
+      loadAndRenderAccounts();
+    } catch (_) {}
+  };
+
+  window.handleUpdateName = async function(e) {
+    e.preventDefault();
+    const newName = (document.getElementById('inpDisplayName').value || '').trim();
+    const alertBox = document.getElementById('nameAlert');
+    const btn = document.getElementById('btnSaveName');
+
+    if (!newName) return;
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+
+    try {
+      if (!isStaticHost && location.protocol.startsWith('http') && currentUser.email) {
+        const res = await fetch('./api/auth/profile/update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: currentUser.email, name: newName })
+        });
+        const ct = res.headers.get('content-type') || '';
+        if (ct.includes('application/json')) {
+          const data = await res.json();
+          if (!res.ok || !data.ok) {
+            throw new Error(data.error || 'Failed to update name on server.');
+          }
+        }
+      }
+
+      // Update local session
+      currentUser.name = newName;
+      localStorage.setItem('koda_user', JSON.stringify(currentUser));
+      const hubU = JSON.parse(localStorage.getItem('hub_user') || '{}');
+      hubU.name = newName;
+      localStorage.setItem('hub_user', JSON.stringify(hubU));
+
+      // Update saved accounts & static browser accounts
+      try {
+        const saved = JSON.parse(localStorage.getItem('koda_saved_accounts') || '[]');
+        const idx = saved.findIndex(a => a.email === currentUser.email);
+        if (idx >= 0) {
+          saved[idx].name = newName;
+          localStorage.setItem('koda_saved_accounts', JSON.stringify(saved));
+        }
+        const staticAccs = JSON.parse(localStorage.getItem('koda_static_accounts') || '[]');
+        const sIdx = staticAccs.findIndex(a => a.email === currentUser.email);
+        if (sIdx >= 0) {
+          staticAccs[sIdx].name = newName;
+          localStorage.setItem('koda_static_accounts', JSON.stringify(staticAccs));
+        }
+      } catch (_) {}
+
+      renderHero();
+      loadAndRenderAccounts();
+
+      alertBox.textContent = 'Profile name updated successfully.';
+      alertBox.className = 'p-3 rounded-lg text-xs bg-emerald-500/10 border-emerald-500/30 text-emerald-400 block';
+      setTimeout(() => alertBox.classList.add('hidden'), 3500);
+    } catch (err) {
+      alertBox.textContent = err.message || 'Error saving name.';
+      alertBox.className = 'p-3 rounded-lg text-xs bg-red-500/10 border-red-500/30 text-red-400 block';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Save Name';
+    }
+  };
+
+  window.handleUpdatePassword = async function(e) {
+    e.preventDefault();
+    const currentPassword = (document.getElementById('inpCurrentPassword').value || '').trim();
+    const newPassword = (document.getElementById('inpNewPassword').value || '').trim();
+    const confirmPassword = (document.getElementById('inpConfirmPassword').value || '').trim();
+    const alertBox = document.getElementById('pwdAlert');
+    const btn = document.getElementById('btnSavePassword');
+
+    if (newPassword !== confirmPassword) {
+      alertBox.textContent = 'New passwords do not match. Please re-enter.';
+      alertBox.className = 'p-3 rounded-lg text-xs bg-red-500/10 border-red-500/30 text-red-400 block';
+      return;
+    }
+    if (newPassword.length < 4) {
+      alertBox.textContent = 'Password must be at least 4 characters.';
+      alertBox.className = 'p-3 rounded-lg text-xs bg-red-500/10 border-red-500/30 text-red-400 block';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Updating...';
+
+    try {
+      let updatedOnServer = false;
+      if (!isStaticHost && location.protocol.startsWith('http') && currentUser.email) {
+        const res = await fetch('./api/auth/profile/update-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: currentUser.email, currentPassword, newPassword })
+        });
+        const ct = res.headers.get('content-type') || '';
+        if (ct.includes('application/json')) {
+          const data = await res.json();
+          if (!res.ok || !data.ok) {
+            throw new Error(data.error || 'Failed to update password.');
+          }
+          updatedOnServer = true;
+        }
+      }
+
+      if (!updatedOnServer && currentUser.email) {
+        // Static mode (GitHub Pages / local browser storage)
+        const staticAccs = JSON.parse(localStorage.getItem('koda_static_accounts') || '[]');
+        const idx = staticAccs.findIndex(a => a.email === currentUser.email.toLowerCase());
+        const curHash = await hashLocalPassword(currentPassword);
+        const newHash = await hashLocalPassword(newPassword);
+        if (idx >= 0) {
+          if (staticAccs[idx].hash && staticAccs[idx].hash !== curHash) {
+            throw new Error('Current password is incorrect.');
+          }
+          staticAccs[idx].hash = newHash;
+        } else {
+          staticAccs.push({
+            id: currentUser.id || 'usr_' + Date.now().toString(36),
+            email: currentUser.email.toLowerCase(),
+            name: currentUser.name,
+            hash: newHash,
+            createdAt: Date.now()
+          });
+        }
+        localStorage.setItem('koda_static_accounts', JSON.stringify(staticAccs));
+      }
+
+      alertBox.textContent = 'Password updated successfully! Your account is secured.';
+      alertBox.className = 'p-3 rounded-lg text-xs bg-emerald-500/10 border-emerald-500/30 text-emerald-400 block';
+      document.getElementById('inpCurrentPassword').value = '';
+      document.getElementById('inpNewPassword').value = '';
+      document.getElementById('inpConfirmPassword').value = '';
+      setTimeout(() => alertBox.classList.add('hidden'), 4000);
+    } catch (err) {
+      alertBox.textContent = err.message || 'Error updating password.';
+      alertBox.className = 'p-3 rounded-lg text-xs bg-red-500/10 border-red-500/30 text-red-400 block';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Update Password';
+    }
+  };
+
+  window.logoutCurrentAccount = function() {
+    localStorage.removeItem('koda_user');
+    localStorage.removeItem('hub_user');
+    window.location.href = 'login.html?logout=1';
+  };
+
+  window.logoutAllAccounts = function() {
+    if (!confirm('Sign out and forget all saved accounts on this device?')) return;
+    localStorage.removeItem('koda_user');
+    localStorage.removeItem('hub_user');
+    localStorage.removeItem('koda_saved_accounts');
+    window.location.href = 'login.html?logout=1';
+  };
+
+  window.clearLocalChats = function() {
+    if (!confirm('Are you sure you want to clear your local chat history? This cannot be undone.')) return;
+    localStorage.removeItem('hub_hist');
+    updateStats();
+    alert('Local chat cache has been cleared.');
+  };
+
+  window.exportUserData = function() {
+    try {
+      const exportObj = {
+        exportedAt: new Date().toISOString(),
+        user: currentUser,
+        savedAccounts: JSON.parse(localStorage.getItem('koda_saved_accounts') || '[]'),
+        history: JSON.parse(localStorage.getItem('hub_hist') || '[]'),
+        settings: {
+          theme: localStorage.getItem('koda_theme_id') || 'amoled',
+          activeModels: localStorage.getItem('active_models') || null
+        }
+      };
+      const blob = new Blob([JSON.stringify(exportObj, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `koda-profile-backup-${(currentUser.name || 'user').toLowerCase().replace(/\s+/g, '-')}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      alert('Failed to export data: ' + e.message);
+    }
+  };
+
+})();
+</script>
+</body>
+</html>

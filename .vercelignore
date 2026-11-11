@@ -1,0 +1,29 @@
+# Large media, videos & local archives
+*.mp4
+*.zip
+*.exe
+*.msi
+*.lnk
+*.apk
+*.ipa
+*.mobileconfig
+
+# Local development and platform builds
+android/
+advertisement/
+science spectrum allen/
+spacedesk/
+Windhawk/
+App/
+koda-android/
+koda-companion/
+koda-everything/
+koda-ios/
+koda-mac/
+__pycache__/
+
+# Dependencies & local temporary storage
+node_modules/
+.git/
+.gemini/
+*.log

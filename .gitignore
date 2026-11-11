@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+
+# Local data, browser profiles, credentials & logs
+data/
+*.log
+.vercel
+.gemini/
+__pycache__/
+
+# Large media, archives & executables (exceeds GitHub 100MB limit)
+*.mp4
+*.zip
+*.exe
+*.msi
+*.lnk
+*.apk
+*.ipa
+*.mobileconfig
+*.dmg
+
+# External local folders and legacy archives
+science spectrum allen/
+spacedesk/
+Windhawk/
+advertisement/
+/App/
+koda-android/
+koda-companion/
+koda-everything/
+koda-ios/
+koda-mac/
+ai-hub-project/
+
+# Android build outputs
+android/app/build/
+android/.gradle/
+android/local.properties
+.DS_Store
+Thumbs.db

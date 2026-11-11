@@ -1,0 +1,35 @@
+{
+  "manifest_version": 3,
+  "name": "Koda AI - ChatGPT Live Mirror Companion",
+  "version": "1.0.0",
+  "description": "Seamlessly mirrors Koda prompts into your personal ChatGPT account without API keys.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "tabs",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://chatgpt.com/*",
+    "https://chat.openai.com/*",
+    "http://localhost:3000/*",
+    "http://127.0.0.1:3000/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://chatgpt.com/*",
+        "https://chat.openai.com/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Koda ChatGPT Mirror Companion"
+  }
+}

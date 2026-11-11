@@ -1,0 +1,347 @@
+/* ==========================================================================
+   KODA AI — Pure AMOLED & Light Mode Theme Engine
+   Supported: Pure AMOLED (Dark) • Light Mode
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   0. SMOOTH THEME & COMPONENT TRANSITIONS
+   -------------------------------------------------------------------------- */
+html.koda-theme-transition,
+html.koda-theme-transition body,
+html.koda-theme-transition .panel,
+html.koda-theme-transition .card,
+html.koda-theme-transition .btn,
+html.koda-theme-transition .solid-btn,
+html.koda-theme-transition nav,
+html.koda-theme-transition .nav-wrap,
+html.koda-theme-transition input,
+html.koda-theme-transition textarea,
+html.koda-theme-transition select,
+html.koda-theme-transition aside,
+html.koda-theme-transition .attach-chip,
+html.koda-theme-transition .hist-item,
+html.koda-theme-transition .theme-preview-card {
+  transition: background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              color 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* --------------------------------------------------------------------------
+   1. PURE AMOLED THEME (Default Dark)
+   True black (#000000), dark grey elevated surfaces, bright readable text
+   -------------------------------------------------------------------------- */
+:root,
+html[data-theme="amoled"],
+html[data-theme="dark"],
+html.dark {
+  --bg: #000000;
+  --bg-secondary: #000000;
+  --panel: #0a0a0a;
+  --card-bg: #0d0d0d;
+  --card-header: #050505;
+  --border: rgba(255, 255, 255, 0.22);
+  --border-muted: rgba(255, 255, 255, 0.10);
+  --border-focus: #ffffff;
+  --text: #f5f5f5;
+  --text-muted: #888888;
+  --text-heading: #ffffff;
+  --accent: #ffffff;
+  --accent-secondary: #d4d4d4;
+  --accent-hover: #e5e5e5;
+  --accent-text: #000000;
+  --accent-glow: rgba(255, 255, 255, 0.22);
+  --btn-bg: rgba(255, 255, 255, 0.08);
+  --btn-hover: rgba(255, 255, 255, 0.16);
+  --btn-border: rgba(255, 255, 255, 0.25);
+  --btn-text: #ffffff;
+  --solid-btn-bg: #ffffff;
+  --solid-btn-text: #000000;
+  --input-bg: #000000;
+  --input-border: rgba(255, 255, 255, 0.25);
+  --input-text: #ffffff;
+  --sidebar-bg: #000000;
+  --nav-bg: rgba(0, 0, 0, 0.96);
+  --modal-overlay: rgba(0, 0, 0, 0.90);
+  --composer-bg: rgba(10, 10, 10, 0.95);
+  --composer-border: rgba(255, 255, 255, 0.25);
+  --ring-glow: 0 0 0 2px rgba(255, 255, 255, 0.4);
+}
+
+/* --------------------------------------------------------------------------
+   2. LIGHT MODE
+   Clean off-white backgrounds, white cards, dark typography & high clarity
+   -------------------------------------------------------------------------- */
+html[data-theme="light"],
+html[data-theme="arctic"],
+html.light {
+  --bg: #f8fafc;
+  --bg-secondary: #f1f5f9;
+  --panel: #ffffff;
+  --card-bg: #ffffff;
+  --card-header: #f8fafc;
+  --border: rgba(15, 23, 42, 0.14);
+  --border-muted: rgba(15, 23, 42, 0.07);
+  --border-focus: #0f172a;
+  --text: #0f172a;
+  --text-muted: #64748b;
+  --text-heading: #020617;
+  --accent: #0f172a;
+  --accent-secondary: #334155;
+  --accent-hover: #1e293b;
+  --accent-text: #ffffff;
+  --accent-glow: rgba(15, 23, 42, 0.15);
+  --btn-bg: #f1f5f9;
+  --btn-hover: #e2e8f0;
+  --btn-border: rgba(15, 23, 42, 0.14);
+  --btn-text: #0f172a;
+  --solid-btn-bg: #0f172a;
+  --solid-btn-text: #ffffff;
+  --input-bg: #ffffff;
+  --input-border: rgba(15, 23, 42, 0.18);
+  --input-text: #0f172a;
+  --sidebar-bg: #f8fafc;
+  --nav-bg: rgba(248, 250, 252, 0.95);
+  --modal-overlay: rgba(15, 23, 42, 0.65);
+  --composer-bg: rgba(255, 255, 255, 0.94);
+  --composer-border: rgba(15, 23, 42, 0.16);
+  --ring-glow: 0 0 0 2px rgba(15, 23, 42, 0.20);
+}
+
+/* --------------------------------------------------------------------------
+   7. BASE ELEMENT STYLING WITH CSS VARIABLES
+   -------------------------------------------------------------------------- */
+body {
+  background-color: var(--bg) !important;
+  color: var(--text) !important;
+  font-family: 'Bricolage Grotesque', system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+code, kbd, samp, pre, .font-mono {
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace !important;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-muted);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border);
+}
+
+/* Panels, Surfaces, Navigation */
+.panel {
+  background-color: var(--panel) !important;
+  border-color: var(--border) !important;
+  color: var(--text) !important;
+}
+
+.nav-wrap {
+  background-color: var(--nav-bg) !important;
+  border-bottom: 1px solid var(--border) !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+/* Interactive Buttons */
+.btn {
+  background-color: var(--btn-bg) !important;
+  border: 1px solid var(--btn-border) !important;
+  color: var(--btn-text) !important;
+  border-radius: 10px;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.btn:hover {
+  background-color: var(--btn-hover) !important;
+  border-color: var(--border-focus) !important;
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn.on {
+  background-color: var(--accent) !important;
+  color: var(--accent-text) !important;
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 14px var(--accent-glow) !important;
+  font-weight: 600;
+}
+
+.solid-btn {
+  background-color: var(--solid-btn-bg) !important;
+  color: var(--solid-btn-text) !important;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.solid-btn:hover {
+  opacity: 0.92;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px var(--accent-glow);
+}
+
+.solid-btn:active {
+  transform: translateY(0);
+}
+
+/* Form Inputs & Selects */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="search"],
+textarea,
+select {
+  background-color: var(--input-bg) !important;
+  border: 1px solid var(--input-border) !important;
+  color: var(--input-text) !important;
+  border-radius: 10px;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+  outline: none;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--border-focus) !important;
+  box-shadow: var(--ring-glow) !important;
+}
+
+/* Model Cards Grid & Output */
+.card {
+  background-color: var(--card-bg) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 16px;
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.card:hover {
+  border-color: var(--border-focus) !important;
+}
+
+.card-header-bar {
+  background-color: var(--card-header) !important;
+  border-bottom: 1px solid var(--border-muted);
+}
+
+/* Floating Chat Composer */
+.floating-composer {
+  background-color: var(--composer-bg) !important;
+  border: 1px solid var(--composer-border) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--border-muted);
+  border-radius: 20px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.floating-composer:focus-within {
+  border-color: var(--border-focus) !important;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.5), var(--ring-glow);
+}
+
+/* Suggested Prompt Cards */
+.suggested-card {
+  background-color: var(--panel);
+  border: 1px solid var(--border-muted);
+  border-radius: 14px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+}
+
+.suggested-card:hover {
+  background-color: var(--card-bg);
+  border-color: var(--border-focus);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px var(--accent-glow);
+}
+
+/* Status Indicator Dots */
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 9999px;
+  display: inline-block;
+}
+.dot.idle { background: var(--text-muted); opacity: 0.5; }
+.dot.streaming { background: var(--accent); box-shadow: 0 0 8px var(--accent); animation: pulse 1.5s infinite; }
+.dot.done { background: #10b981; box-shadow: 0 0 6px #10b981; }
+.dot.error { background: #ef4444; }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.9); }
+}
+
+/* Mobile Safe Areas for Capacitor */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .safe-bottom {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 0.75rem);
+  }
+  .safe-top {
+    padding-top: calc(env(safe-area-inset-top) + 0.5rem);
+  }
+}
+
+/* Theme Studio Preview Cards */
+.theme-card-option {
+  position: relative;
+  cursor: pointer;
+  border-radius: 14px;
+  border: 2px solid var(--border-muted);
+  padding: 12px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  user-select: none;
+}
+
+.theme-card-option:hover {
+  transform: translateY(-2px);
+  border-color: var(--border);
+}
+
+.theme-card-option.active-theme {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 16px var(--accent-glow) !important;
+}
+
+/* Mobile Bottom Navigation Bar */
+#mobileBottomNav {
+  background-color: var(--nav-bg);
+  border-top: 1px solid var(--border);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}

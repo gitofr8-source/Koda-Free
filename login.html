@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sign in — Koda</title>
+<meta name="description" content="Sign in to your Koda workspace.">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Koda">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Themes Engine -->
+<link rel="stylesheet" href="theme-styles.css">
+<script src="theme-manager.js"></script>
+
+<style>
+:root {
+  --bg: #0f1115;
+  --panel: #181b22;
+  --border: rgba(255, 255, 255, 0.12);
+  --border-muted: rgba(255, 255, 255, 0.07);
+  --text: #f1f3f7;
+  --text-muted: #8e94a0;
+  --accent: #ffffff;
+  --accent-text: #000000;
+  --solid-btn-bg: #ffffff;
+  --solid-btn-text: #000000;
+}
+html.light {
+  --bg: #f8fafc;
+  --panel: #ffffff;
+  --border: rgba(0, 0, 0, 0.12);
+  --border-muted: rgba(0, 0, 0, 0.07);
+  --text: #0f172a;
+  --text-muted: #64748b;
+  --accent: #0f172a;
+  --accent-text: #ffffff;
+  --solid-btn-bg: #0f172a;
+  --solid-btn-text: #ffffff;
+}
+body {
+  font-family: 'Bricolage Grotesque', system-ui, -apple-system, sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+.panel {
+  background-color: var(--panel);
+  border: 1px solid var(--border);
+}
+.btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 10px;
+  transition: all 0.15s ease;
+}
+.btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+html.light .btn {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.12);
+}
+html.light .btn:hover {
+  background: rgba(0, 0, 0, 0.08);
+}
+.solid-btn {
+  background: var(--solid-btn-bg);
+  color: var(--solid-btn-text);
+  border-radius: 10px;
+  font-weight: 600;
+  transition: opacity 0.15s ease;
+}
+.solid-btn:hover {
+  opacity: 0.9;
+}
+input {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 10px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.15);
+}
+html.light input {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.15);
+}
+html.light input:focus {
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+}
+</style>
+</head>
+<body class="flex flex-col justify-between p-4 sm:p-6 antialiased">
+
+  <!-- Top bar with brand & theme switcher -->
+  <header class="w-full max-w-5xl mx-auto flex items-center justify-between py-2">
+    <a href="index.html" class="flex items-center gap-2 text-white font-bold text-lg tracking-tight hover:opacity-90 transition">
+      <span class="w-2 h-2 rounded-full bg-white"></span>
+      <span>Koda</span>
+    </a>
+    <div class="flex items-center gap-2">
+      <!-- Quick theme toggle button -->
+      <button id="themeToggle" onclick="window.toggleTheme()" class="btn !p-2 flex items-center justify-center text-white cursor-pointer" aria-label="Toggle theme" title="Toggle AMOLED / Light">
+        <svg id="themeIconSun" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        <svg id="themeIconMoon" class="w-4 h-4 hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+      </button>
+      <button id="themeSettingsBtn" onclick="window.openThemeModal()" class="btn !p-2 flex items-center justify-center text-white cursor-pointer" aria-label="Theme settings" title="Theme Settings (Pure AMOLED & Light Mode)">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.563-2.512 5.563-5.563C22 6.5 17.5 2 12 2Z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Center Auth Card -->
+  <main class="w-full max-w-[420px] mx-auto my-auto py-8">
+    <div class="panel p-6 sm:p-8 rounded-2xl shadow-2xl border border-white/10 backdrop-blur-lg">
+      
+      <!-- Brand & Title -->
+      <div class="text-center mb-6">
+        <div class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-white/5 border border-white/10 mb-3 text-white">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+        </div>
+        <h1 id="authTitle" class="text-xl sm:text-2xl font-bold tracking-tight text-white">Sign in to Koda</h1>
+        <p id="authSubtitle" class="text-xs text-[#8e94a0] mt-1.5 leading-relaxed">
+          Access your multi-engine workspace and saved chats.
+        </p>
+      </div>
+
+      <!-- Mode Tabs (Sign In vs Create Account) -->
+      <div class="flex items-center p-1 rounded-xl bg-white/[0.03] border border-white/10 mb-5 text-xs">
+        <button type="button" id="tabSignIn" onclick="setMode('signin')" class="flex-1 py-1.5 font-semibold text-center rounded-lg transition bg-white text-black shadow-sm">
+          Sign In
+        </button>
+        <button type="button" id="tabRegister" onclick="setMode('register')" class="flex-1 py-1.5 font-medium text-center rounded-lg transition text-[#8e94a0] hover:text-white">
+          Create Account
+        </button>
+      </div>
+
+      <!-- Error / Notice Box -->
+      <div id="authAlert" class="hidden p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs mb-4 flex items-center gap-2">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" class="flex-shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span id="authAlertText" class="flex-1"></span>
+      </div>
+
+      <!-- Auth Form -->
+      <form id="authForm" onsubmit="handleAuthSubmit(event)" class="space-y-4">
+        
+        <!-- Name field (shown on Register mode) -->
+        <div id="fieldGroup_name" class="hidden space-y-1.5">
+          <label class="block text-xs font-medium text-[#8e94a0]">Full Name</label>
+          <input type="text" id="inpName" placeholder="Alex Smith" autocomplete="name" class="w-full px-3.5 py-2.5 text-xs text-white placeholder-[#646a78]">
+        </div>
+
+        <!-- Email field -->
+        <div class="space-y-1.5">
+          <label class="block text-xs font-medium text-[#8e94a0]">Email Address</label>
+          <input type="email" id="inpEmail" placeholder="name@domain.com" required autocomplete="email" class="w-full px-3.5 py-2.5 text-xs text-white placeholder-[#646a78]">
+        </div>
+
+        <!-- Password field -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between">
+            <label class="block text-xs font-medium text-[#8e94a0]">Password</label>
+            <span id="forgotNotice" class="text-[11px] text-[#8e94a0] cursor-pointer hover:text-white" onclick="alert('Enter your email and click Submit to log in or create your personal account.')">Need help?</span>
+          </div>
+          <div class="relative">
+            <input type="password" id="inpPassword" placeholder="••••••••" required autocomplete="current-password" class="w-full px-3.5 py-2.5 pr-10 text-xs text-white placeholder-[#646a78]">
+            <button type="button" onclick="togglePasswordVis()" class="absolute right-3 top-1/2 -translate-y-1/2 text-[#8e94a0] hover:text-white" title="Show or hide password">
+              <svg id="eyeIcon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Remember Me Checkbox -->
+        <div class="flex items-center justify-between text-xs pt-1">
+          <label class="flex items-center gap-2 cursor-pointer text-[#8e94a0] hover:text-white">
+            <input type="checkbox" id="chkRemember" checked class="w-3.5 h-3.5 rounded border-white/20 bg-white/5 accent-white">
+            <span>Remember me</span>
+          </label>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" id="btnSubmit" class="solid-btn w-full !py-2.5 !px-4 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer mt-2">
+          <span id="btnSubmitText">Sign In</span>
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </form>
+
+      <!-- Divider -->
+      <div class="relative flex items-center justify-center my-5">
+        <div class="border-t border-white/10 w-full"></div>
+        <span class="bg-[#181b22] px-2 text-[11px] text-[#8e94a0] font-mono uppercase tracking-wider relative">or</span>
+      </div>
+
+      <!-- Quick Guest Option -->
+      <button type="button" onclick="loginAsGuest()" class="btn w-full !py-2.5 !px-4 text-xs font-medium flex items-center justify-center gap-2 cursor-pointer text-[#8e94a0] hover:text-white" title="Quick local access without password">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>Continue as Guest</span>
+      </button>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="w-full max-w-5xl mx-auto py-3 text-center text-xs text-[#8e94a0]">
+    <span>Koda Parallel Workspace &copy; 2026. Secure Local &amp; Cloud Intelligence.</span>
+  </footer>
+
+  <script>
+    let currentMode = 'signin';
+    const params = new URLSearchParams(window.location.search);
+    function normalizeRedirect(raw) {
+      if (!raw) return 'chat.html';
+      if (raw === '/chat' || raw === 'chat') return 'chat.html';
+      if (raw === '/profile' || raw === 'profile' || raw === '/account' || raw === '/accounts') return 'profile.html';
+      if (raw === '/') return 'index.html';
+      return raw;
+    }
+    const redirectUrl = normalizeRedirect(params.get('redirect'));
+
+    // Auto-redirect if already authenticated
+    (function checkAlreadyLoggedIn() {
+      // If user passed ?logout=1, clear existing session
+      if (params.get('logout') === '1') {
+        localStorage.removeItem('koda_user');
+        localStorage.removeItem('hub_user');
+        return;
+      }
+      // If user passed switch=1 or email=..., do not auto-redirect; let them switch accounts
+      if (params.get('switch') === '1' || params.get('email')) {
+        return;
+      }
+      try {
+        const raw = localStorage.getItem('koda_user') || localStorage.getItem('hub_user');
+        if (raw) {
+          const u = JSON.parse(raw);
+          if (u && (u.email || u.name || u.id)) {
+            window.location.replace(redirectUrl);
+          }
+        }
+      } catch (_) {}
+    })();
+
+    // Prefill email or mode from query parameters
+    document.addEventListener('DOMContentLoaded', () => {
+      const emailParam = params.get('email');
+      if (emailParam) {
+        const inp = document.getElementById('inpEmail');
+        if (inp) {
+          inp.value = emailParam;
+          const pwd = document.getElementById('inpPassword');
+          if (pwd) pwd.focus();
+        }
+      }
+      if (params.get('mode') === 'register') {
+        setMode('register');
+      }
+    });
+
+    function setMode(mode) {
+      currentMode = mode;
+      const tabIn = document.getElementById('tabSignIn');
+      const tabReg = document.getElementById('tabRegister');
+      const nameGroup = document.getElementById('fieldGroup_name');
+      const title = document.getElementById('authTitle');
+      const subtitle = document.getElementById('authSubtitle');
+      const btnText = document.getElementById('btnSubmitText');
+      const alertBox = document.getElementById('authAlert');
+      if (alertBox) alertBox.classList.add('hidden');
+
+      if (mode === 'register') {
+        tabIn.className = 'flex-1 py-1.5 font-medium text-center rounded-lg transition text-[#8e94a0] hover:text-white';
+        tabReg.className = 'flex-1 py-1.5 font-semibold text-center rounded-lg transition bg-white text-black shadow-sm';
+        nameGroup.classList.remove('hidden');
+        title.textContent = 'Create your account';
+        subtitle.textContent = 'Enter your details to create your Koda account.';
+        btnText.textContent = 'Create Account';
+      } else {
+        tabIn.className = 'flex-1 py-1.5 font-semibold text-center rounded-lg transition bg-white text-black shadow-sm';
+        tabReg.className = 'flex-1 py-1.5 font-medium text-center rounded-lg transition text-[#8e94a0] hover:text-white';
+        nameGroup.classList.add('hidden');
+        title.textContent = 'Sign in to Koda';
+        subtitle.textContent = 'Access your multi-engine workspace and saved chats.';
+        btnText.textContent = 'Sign In';
+      }
+    }
+
+    function showAlert(msg) {
+      const box = document.getElementById('authAlert');
+      const text = document.getElementById('authAlertText');
+      if (box && text) {
+        text.textContent = msg;
+        box.classList.remove('hidden');
+      }
+    }
+
+    function togglePasswordVis() {
+      const inp = document.getElementById('inpPassword');
+      if (!inp) return;
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+    }
+
+    async function hashLocalPassword(pwd) {
+      try {
+        if (window.crypto && window.crypto.subtle) {
+          const buf = new TextEncoder().encode('koda_static_' + pwd);
+          const digest = await window.crypto.subtle.digest('SHA-256', buf);
+          return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+      } catch (_) {}
+      // Simple deterministic fallback if crypto.subtle unavailable
+      let h = 2166136261;
+      for (let i = 0; i < pwd.length; i++) {
+        h ^= pwd.charCodeAt(i);
+        h += (h << 1) + (h << 4) + (h << 7) + (h << 8) + (h << 24);
+      }
+      return 'h_' + (h >>> 0).toString(16);
+    }
+
+    async function handleStaticAuth(mode, email, password, name) {
+      const normalized = email.trim().toLowerCase();
+      const pwdHash = await hashLocalPassword(password);
+      let store = [];
+      try { store = JSON.parse(localStorage.getItem('koda_static_accounts') || '[]'); } catch (_) {}
+      if (!Array.isArray(store)) store = [];
+
+      const existing = store.find(a => a.email === normalized);
+      if (mode === 'register') {
+        if (existing) {
+          return { ok: false, error: 'An account with this email already exists on this device. Please Sign In.' };
+        }
+        const acc = {
+          id: 'usr_' + Date.now().toString(36),
+          email: normalized,
+          name: name || normalized.split('@')[0],
+          hash: pwdHash,
+          createdAt: Date.now(),
+          isLocal: true
+        };
+        store.push(acc);
+        localStorage.setItem('koda_static_accounts', JSON.stringify(store));
+        return { ok: true, user: { id: acc.id, email: acc.email, name: acc.name, createdAt: acc.createdAt } };
+      } else {
+        if (existing) {
+          if (existing.hash && existing.hash !== pwdHash) {
+            return { ok: false, error: 'Invalid password. Please try again.' };
+          }
+          return { ok: true, user: { id: existing.id, email: existing.email, name: existing.name, createdAt: existing.createdAt } };
+        }
+        // Create on first static sign-in on GitHub Pages so users can log straight in smoothly
+        const acc = {
+          id: 'usr_' + Date.now().toString(36),
+          email: normalized,
+          name: name || normalized.split('@')[0],
+          hash: pwdHash,
+          createdAt: Date.now(),
+          isLocal: true
+        };
+        store.push(acc);
+        localStorage.setItem('koda_static_accounts', JSON.stringify(store));
+        return { ok: true, user: { id: acc.id, email: acc.email, name: acc.name, createdAt: acc.createdAt } };
+      }
+    }
+
+    async function handleAuthSubmit(e) {
+      e.preventDefault();
+      const email = (document.getElementById('inpEmail')?.value || '').trim();
+      const password = (document.getElementById('inpPassword')?.value || '').trim();
+      const name = (document.getElementById('inpName')?.value || '').trim();
+      const btn = document.getElementById('btnSubmit');
+      const btnText = document.getElementById('btnSubmitText');
+
+      if (!email || !password) {
+        return showAlert('Please enter both email and password.');
+      }
+      if (password.length < 4) {
+        return showAlert('Password must be at least 4 characters.');
+      }
+
+      const originalText = btnText.textContent;
+      btn.disabled = true;
+      btnText.textContent = currentMode === 'register' ? 'Creating...' : 'Signing in...';
+
+      const isStaticHost = location.protocol === 'file:' || location.hostname.endsWith('github.io');
+
+      try {
+        if (!isStaticHost && location.protocol.startsWith('http')) {
+          const endpoint = currentMode === 'register' ? './api/auth/register' : './api/auth/login';
+          const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password, name })
+          });
+          const ct = res.headers.get('content-type') || '';
+          if (ct.includes('application/json')) {
+            const data = await res.json();
+            if (!res.ok || !data.ok) {
+              showAlert(data.error || 'Authentication failed. Please check your credentials.');
+              btn.disabled = false;
+              btnText.textContent = originalText;
+              return;
+            }
+            saveUserSession(data.user);
+            window.location.href = redirectUrl;
+            return;
+          }
+        }
+
+        // Static host (GitHub Pages) or file:// fallback
+        const localRes = await handleStaticAuth(currentMode, email, password, name);
+        if (!localRes.ok) {
+          showAlert(localRes.error || 'Authentication failed.');
+          btn.disabled = false;
+          btnText.textContent = originalText;
+          return;
+        }
+        saveUserSession(localRes.user);
+        window.location.href = redirectUrl;
+      } catch (err) {
+        const localRes = await handleStaticAuth(currentMode, email, password, name);
+        if (!localRes.ok) {
+          showAlert(localRes.error || 'Authentication failed.');
+          btn.disabled = false;
+          btnText.textContent = originalText;
+          return;
+        }
+        saveUserSession(localRes.user);
+        window.location.href = redirectUrl;
+      }
+    }
+
+    function loginAsGuest() {
+      const guestUser = {
+        id: 'guest_' + Date.now().toString(36).slice(-4),
+        name: 'Guest User',
+        email: '',
+        isGuest: true
+      };
+      saveUserSession(guestUser);
+      window.location.href = redirectUrl;
+    }
+
+    function saveUserSession(user) {
+      localStorage.setItem('koda_user', JSON.stringify(user));
+      localStorage.setItem('hub_user', JSON.stringify({
+        name: user.name,
+        email: user.email,
+        picture: user.picture || ''
+      }));
+      // Keep saved accounts registry up to date for the profile/accounts switcher
+      try {
+        if (!user.isGuest && user.email) {
+          const rawAccounts = localStorage.getItem('koda_saved_accounts');
+          let saved = rawAccounts ? JSON.parse(rawAccounts) : [];
+          if (!Array.isArray(saved)) saved = [];
+          const idx = saved.findIndex(a => a.email === user.email || (user.id && a.id === user.id));
+          const entry = {
+            id: user.id || ('usr_' + Math.random().toString(36).slice(2, 10)),
+            email: user.email,
+            name: user.name || user.email.split('@')[0],
+            picture: user.picture || '',
+            lastUsed: Date.now()
+          };
+          if (idx >= 0) {
+            saved[idx] = Object.assign(saved[idx], entry);
+          } else {
+            saved.push(entry);
+          }
+          localStorage.setItem('koda_saved_accounts', JSON.stringify(saved));
+        }
+      } catch (_) {}
+    }
+  </script>
+</body>
+</html>
