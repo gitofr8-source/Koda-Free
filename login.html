@@ -23,6 +23,7 @@
 <!-- Themes Engine -->
 <link rel="stylesheet" href="theme-styles.css">
 <script src="theme-manager.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 
 <style>
 :root {
@@ -107,6 +108,19 @@ html.light input {
 html.light input:focus {
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
 }
+.tab-btn-active {
+  background-color: var(--solid-btn-bg);
+  color: var(--solid-btn-text);
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+.tab-btn-inactive {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+.tab-btn-inactive:hover {
+  color: var(--text);
+}
 </style>
 </head>
 <body class="flex flex-col justify-between p-4 sm:p-6 antialiased">
@@ -147,13 +161,22 @@ html.light input:focus {
         </p>
       </div>
 
-      <!-- Mode Tabs (Sign In vs Create Account) -->
-      <div class="flex items-center p-1 rounded-xl bg-white/[0.03] border border-white/10 mb-5 text-xs">
-        <button type="button" id="tabSignIn" onclick="setMode('signin')" class="flex-1 py-1.5 font-semibold text-center rounded-lg transition bg-white text-black shadow-sm">
+      <!-- Mode Tabs (Sign In vs Create Account vs Google) -->
+      <div class="flex items-center p-1 rounded-xl bg-white/[0.03] border border-white/10 mb-5 text-xs gap-1">
+        <button type="button" id="tabSignIn" onclick="setMode('signin')" class="flex-1 py-1.5 text-center rounded-lg transition tab-btn-active cursor-pointer">
           Sign In
         </button>
-        <button type="button" id="tabRegister" onclick="setMode('register')" class="flex-1 py-1.5 font-medium text-center rounded-lg transition text-[#8e94a0] hover:text-white">
+        <button type="button" id="tabRegister" onclick="setMode('register')" class="flex-1 py-1.5 text-center rounded-lg transition tab-btn-inactive cursor-pointer">
           Create Account
+        </button>
+        <button type="button" id="tabGoogle" onclick="setMode('google')" class="flex-1 py-1.5 text-center rounded-lg transition tab-btn-inactive cursor-pointer flex items-center justify-center gap-1.5">
+          <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
+            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z"/>
+            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.14C3.26 21.3 7.31 24 12 24Z"/>
+            <path fill="#FBBC05" d="M5.28 14.24c-.24-.72-.38-1.49-.38-2.24s.14-1.52.38-2.24V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.99-3.14Z"/>
+            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.99 3.14c.95-2.85 3.6-4.96 6.72-4.96Z"/>
+          </svg>
+          <span>Google</span>
         </button>
       </div>
 
@@ -161,6 +184,47 @@ html.light input:focus {
       <div id="authAlert" class="hidden p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs mb-4 flex items-center gap-2">
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" class="flex-shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
         <span id="authAlertText" class="flex-1"></span>
+      </div>
+
+      <!-- Google Login Panel (shown on Google tab) -->
+      <div id="googlePanel" class="hidden space-y-4">
+        <div id="googleReadyView" class="hidden space-y-3 text-center">
+          <div class="p-4 rounded-xl border border-white/10 bg-white/[0.02] flex flex-col items-center justify-center gap-3">
+            <p class="text-xs text-[#8e94a0]">Sign in securely using your verified Google account.</p>
+            <div id="googleBtnHost" class="flex justify-center min-h-[44px]"></div>
+            <p id="googleInitStatus" class="text-[11px] text-[#8e94a0] hidden">Loading Google Sign-In...</p>
+          </div>
+          <button type="button" onclick="showGoogleConfig(true)" class="text-[11px] text-[#8e94a0] hover:text-white underline cursor-pointer bg-transparent border-0">
+            Configure / change Google Client ID
+          </button>
+        </div>
+
+        <div id="googleConfigView" class="hidden space-y-3">
+          <div class="p-3.5 rounded-xl border border-white/10 bg-white/[0.03] space-y-2 text-xs">
+            <div class="font-semibold text-white">Connect Google OAuth Client ID</div>
+            <p class="text-[11px] text-[#8e94a0] leading-relaxed">
+              Enter your Google Cloud Web OAuth Client ID to activate 1-click Google Sign-In on this origin:
+            </p>
+            <div class="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg bg-black/30 border border-white/10 font-mono text-[11px] text-[#8e94a0]">
+              <span id="googleOriginLabel" class="truncate"></span>
+              <button type="button" onclick="copyGoogleOrigin()" class="text-[10px] font-sans font-semibold text-white hover:underline flex-shrink-0 cursor-pointer bg-transparent border-0">Copy</button>
+            </div>
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="block text-xs font-medium text-[#8e94a0]">Google Client ID</label>
+            <input type="text" id="inpGoogleClientId" placeholder="1234567890-xxxxx.apps.googleusercontent.com" class="w-full px-3.5 py-2.5 text-xs font-mono placeholder-[#646a78]">
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="saveGoogleClientId()" class="solid-btn flex-1 !py-2.5 !px-4 text-xs font-bold cursor-pointer">
+              Save &amp; Enable Google Login
+            </button>
+            <button type="button" id="btnCancelGoogleConfig" onclick="showGoogleConfig(false)" class="hidden btn !py-2.5 !px-3 text-xs cursor-pointer">
+              Back
+            </button>
+          </div>
+        </div>
       </div>
 
       <!-- Auth Form -->
@@ -210,7 +274,7 @@ html.light input:focus {
       <!-- Divider -->
       <div class="relative flex items-center justify-center my-5">
         <div class="border-t border-white/10 w-full"></div>
-        <span class="bg-[#181b22] px-2 text-[11px] text-[#8e94a0] font-mono uppercase tracking-wider relative">or</span>
+        <span style="background-color: var(--panel)" class="px-2 text-[11px] text-[#8e94a0] font-mono uppercase tracking-wider relative">or</span>
       </div>
 
       <!-- Quick Guest Option -->
@@ -264,6 +328,9 @@ html.light input:focus {
 
     // Prefill email or mode from query parameters
     document.addEventListener('DOMContentLoaded', () => {
+      const originLbl = document.getElementById('googleOriginLabel');
+      if (originLbl) originLbl.textContent = location.origin && location.origin !== 'null' ? location.origin : 'http://localhost:3000';
+
       const emailParam = params.get('email');
       if (emailParam) {
         const inp = document.getElementById('inpEmail');
@@ -273,8 +340,13 @@ html.light input:focus {
           if (pwd) pwd.focus();
         }
       }
-      if (params.get('mode') === 'register') {
+      const modeParam = params.get('mode');
+      if (modeParam === 'register') {
         setMode('register');
+      } else if (modeParam === 'google') {
+        setMode('google');
+      } else {
+        setMode('signin');
       }
     });
 
@@ -282,6 +354,9 @@ html.light input:focus {
       currentMode = mode;
       const tabIn = document.getElementById('tabSignIn');
       const tabReg = document.getElementById('tabRegister');
+      const tabGoogle = document.getElementById('tabGoogle');
+      const authForm = document.getElementById('authForm');
+      const googlePanel = document.getElementById('googlePanel');
       const nameGroup = document.getElementById('fieldGroup_name');
       const title = document.getElementById('authTitle');
       const subtitle = document.getElementById('authSubtitle');
@@ -289,22 +364,218 @@ html.light input:focus {
       const alertBox = document.getElementById('authAlert');
       if (alertBox) alertBox.classList.add('hidden');
 
-      if (mode === 'register') {
-        tabIn.className = 'flex-1 py-1.5 font-medium text-center rounded-lg transition text-[#8e94a0] hover:text-white';
-        tabReg.className = 'flex-1 py-1.5 font-semibold text-center rounded-lg transition bg-white text-black shadow-sm';
+      const baseTab = 'flex-1 py-1.5 text-center rounded-lg transition cursor-pointer ';
+      const baseGoogleTab = 'flex-1 py-1.5 text-center rounded-lg transition cursor-pointer flex items-center justify-center gap-1.5 ';
+
+      if (mode === 'google') {
+        tabIn.className = baseTab + 'tab-btn-inactive';
+        tabReg.className = baseTab + 'tab-btn-inactive';
+        tabGoogle.className = baseGoogleTab + 'tab-btn-active';
+        authForm.classList.add('hidden');
+        googlePanel.classList.remove('hidden');
+        title.textContent = 'Continue with Google';
+        subtitle.textContent = 'Sign in using your Google account in one tap.';
+        initGoogleTab();
+      } else if (mode === 'register') {
+        tabIn.className = baseTab + 'tab-btn-inactive';
+        tabReg.className = baseTab + 'tab-btn-active';
+        tabGoogle.className = baseGoogleTab + 'tab-btn-inactive';
+        googlePanel.classList.add('hidden');
+        authForm.classList.remove('hidden');
         nameGroup.classList.remove('hidden');
         title.textContent = 'Create your account';
         subtitle.textContent = 'Enter your details to create your Koda account.';
         btnText.textContent = 'Create Account';
       } else {
-        tabIn.className = 'flex-1 py-1.5 font-semibold text-center rounded-lg transition bg-white text-black shadow-sm';
-        tabReg.className = 'flex-1 py-1.5 font-medium text-center rounded-lg transition text-[#8e94a0] hover:text-white';
+        tabIn.className = baseTab + 'tab-btn-active';
+        tabReg.className = baseTab + 'tab-btn-inactive';
+        tabGoogle.className = baseGoogleTab + 'tab-btn-inactive';
+        googlePanel.classList.add('hidden');
+        authForm.classList.remove('hidden');
         nameGroup.classList.add('hidden');
         title.textContent = 'Sign in to Koda';
         subtitle.textContent = 'Access your multi-engine workspace and saved chats.';
         btnText.textContent = 'Sign In';
       }
     }
+
+    function getStoredGoogleClientId() {
+      try {
+        const raw = localStorage.getItem('hub_gid');
+        if (!raw) return '';
+        try {
+          const parsed = JSON.parse(raw);
+          return typeof parsed === 'string' ? parsed.trim() : '';
+        } catch (_) {
+          return raw.trim();
+        }
+      } catch (_) {
+        return '';
+      }
+    }
+
+    let googleInitAttempts = 0;
+    let activeGoogleClientId = '';
+
+    async function resolveGoogleClientId() {
+      let cid = getStoredGoogleClientId();
+      if (cid) return cid;
+
+      const isStaticHost = location.protocol === 'file:' || location.hostname.endsWith('github.io');
+      if (!isStaticHost && location.protocol.startsWith('http')) {
+        try {
+          const res = await fetch('./api/auth/google/config');
+          const ct = res.headers.get('content-type') || '';
+          if (res.ok && ct.includes('application/json')) {
+            const data = await res.json();
+            if (data && data.clientId) {
+              cid = String(data.clientId).trim();
+              localStorage.setItem('hub_gid', JSON.stringify(cid));
+            }
+          }
+        } catch (_) {}
+      }
+      return cid;
+    }
+
+    async function initGoogleTab() {
+      const readyView = document.getElementById('googleReadyView');
+      const configView = document.getElementById('googleConfigView');
+      const statusEl = document.getElementById('googleInitStatus');
+      const hostEl = document.getElementById('googleBtnHost');
+      const inpCid = document.getElementById('inpGoogleClientId');
+      const btnCancel = document.getElementById('btnCancelGoogleConfig');
+
+      const cid = await resolveGoogleClientId();
+      activeGoogleClientId = cid;
+
+      if (!cid) {
+        readyView.classList.add('hidden');
+        configView.classList.remove('hidden');
+        if (btnCancel) btnCancel.classList.add('hidden');
+        return;
+      }
+
+      if (inpCid) inpCid.value = cid;
+      if (btnCancel) btnCancel.classList.remove('hidden');
+      configView.classList.add('hidden');
+      readyView.classList.remove('hidden');
+
+      if (!window.google || !window.google.accounts || !window.google.accounts.id) {
+        if (statusEl) {
+          statusEl.textContent = 'Loading Google Sign-In...';
+          statusEl.classList.remove('hidden');
+        }
+        if (googleInitAttempts < 25) {
+          googleInitAttempts++;
+          setTimeout(() => { if (currentMode === 'google') initGoogleTab(); }, 300);
+        } else if (statusEl) {
+          statusEl.textContent = 'Google Sign-In script could not load. Check your internet connection or ad blocker.';
+        }
+        return;
+      }
+
+      if (statusEl) statusEl.classList.add('hidden');
+      hostEl.innerHTML = '';
+      const isLight = document.documentElement.classList.contains('light');
+      try {
+        window.google.accounts.id.initialize({
+          client_id: cid,
+          callback: handleGoogleCredential
+        });
+        window.google.accounts.id.renderButton(hostEl, {
+          theme: isLight ? 'outline' : 'filled_black',
+          size: 'large',
+          shape: 'pill',
+          text: 'continue_with',
+          width: 300
+        });
+      } catch (err) {
+        showAlert('Invalid Google Client ID or unauthorized origin. Please verify your Client ID below.');
+        showGoogleConfig(true);
+      }
+    }
+
+    function showGoogleConfig(show) {
+      const readyView = document.getElementById('googleReadyView');
+      const configView = document.getElementById('googleConfigView');
+      const btnCancel = document.getElementById('btnCancelGoogleConfig');
+      const inpCid = document.getElementById('inpGoogleClientId');
+      if (show) {
+        if (inpCid) inpCid.value = getStoredGoogleClientId();
+        if (btnCancel && getStoredGoogleClientId()) btnCancel.classList.remove('hidden');
+        readyView.classList.add('hidden');
+        configView.classList.remove('hidden');
+      } else {
+        configView.classList.add('hidden');
+        initGoogleTab();
+      }
+    }
+
+    function saveGoogleClientId() {
+      const val = (document.getElementById('inpGoogleClientId')?.value || '').trim();
+      if (!val || !val.includes('.apps.googleusercontent.com')) {
+        return showAlert('Please enter a valid Google Web Client ID ending in .apps.googleusercontent.com');
+      }
+      const alertBox = document.getElementById('authAlert');
+      if (alertBox) alertBox.classList.add('hidden');
+      localStorage.setItem('hub_gid', JSON.stringify(val));
+      googleInitAttempts = 0;
+      initGoogleTab();
+    }
+
+    function copyGoogleOrigin() {
+      const text = (document.getElementById('googleOriginLabel')?.textContent || location.origin).trim();
+      navigator.clipboard?.writeText(text).catch(() => {});
+    }
+
+    async function handleGoogleCredential(response) {
+      try {
+        const parts = String(response.credential || '').split('.');
+        if (parts.length < 2) throw new Error('Malformed Google credential');
+        const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+        const payload = JSON.parse(decodeURIComponent(escape(atob(b64))));
+
+        let userObj = {
+          id: 'goog_' + (payload.sub || Date.now().toString(36)),
+          email: (payload.email || '').trim().toLowerCase(),
+          name: payload.name || (payload.email ? payload.email.split('@')[0] : 'Google User'),
+          picture: payload.picture || '',
+          provider: 'google',
+          createdAt: Date.now()
+        };
+
+        const isStaticHost = location.protocol === 'file:' || location.hostname.endsWith('github.io');
+        if (!isStaticHost && location.protocol.startsWith('http')) {
+          try {
+            const res = await fetch('./api/auth/google', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ credential: response.credential })
+            });
+            const ct = res.headers.get('content-type') || '';
+            if (ct.includes('application/json')) {
+              const data = await res.json();
+              if (!res.ok || !data.ok) {
+                return showAlert(data.error || 'Google sign-in verification failed.');
+              }
+              if (data.user) userObj = data.user;
+            }
+          } catch (_) {}
+        }
+
+        saveUserSession(userObj);
+        window.location.href = redirectUrl;
+      } catch (err) {
+        showAlert('Google Sign-In failed. Please try again.');
+      }
+    }
+
+    window.addEventListener('koda-theme-changed', () => {
+      if (currentMode === 'google' && activeGoogleClientId) {
+        initGoogleTab();
+      }
+    });
 
     function showAlert(msg) {
       const box = document.getElementById('authAlert');
@@ -480,6 +751,7 @@ html.light input:focus {
             email: user.email,
             name: user.name || user.email.split('@')[0],
             picture: user.picture || '',
+            provider: user.provider || 'email',
             lastUsed: Date.now()
           };
           if (idx >= 0) {

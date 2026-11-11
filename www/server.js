@@ -991,6 +991,71 @@ async function requestHandler(req, res) {
       }));
     }
 
+    // Auth: Google OAuth Public Config
+    if (req.method === 'GET' && url.pathname === '/api/auth/google/config') {
+      SERVER_VAULT = loadVault();
+      const clientId = process.env.GOOGLE_CLIENT_ID || SERVER_VAULT.google_client_id || '';
+      return send(res, 200, 'application/json', JSON.stringify({ ok: true, clientId }));
+    }
+
+    // Auth: Verify Google ID Token & Sign In
+    if (req.method === 'POST' && url.pathname === '/api/auth/google') {
+      let b;
+      try { b = await readBody(req, 32768); } catch (e) { return send(res, 400, 'application/json', JSON.stringify({ ok: false, error: 'Invalid payload' })); }
+      const credential = String(b.credential || '').trim();
+      if (!credential) {
+        return send(res, 400, 'application/json', JSON.stringify({ ok: false, error: 'Missing Google ID token credential.' }));
+      }
+      try {
+        const info = await new Promise((resolve, reject) => {
+          const gReq = https.get('https://oauth2.googleapis.com/tokeninfo?id_token=' + encodeURIComponent(credential), { timeout: 6000 }, (gRes) => {
+            let raw = '';
+            gRes.on('data', chunk => { raw += chunk; });
+            gRes.on('end', () => {
+              if (gRes.statusCode !== 200) return reject(new Error('Google token verification failed'));
+              try { resolve(JSON.parse(raw)); } catch (err) { reject(err); }
+            });
+          });
+          gReq.on('error', reject);
+          gReq.on('timeout', () => { try { gReq.destroy(); } catch (_) {} reject(new Error('Verification timeout')); });
+        });
+        const email = (info.email || '').trim().toLowerCase();
+        if (!email || info.email_verified === 'false' || info.email_verified === false) {
+          return send(res, 401, 'application/json', JSON.stringify({ ok: false, error: 'Unverified Google account email.' }));
+        }
+        accounts = loadAccounts();
+        let existing = accounts.find(a => a.email === email);
+        if (!existing) {
+          existing = {
+            id: 'goog_' + (info.sub || crypto.randomBytes(6).toString('hex')),
+            email,
+            name: (info.name || email.split('@')[0]).trim(),
+            picture: info.picture || '',
+            provider: 'google',
+            createdAt: Date.now()
+          };
+          accounts.push(existing);
+        } else {
+          if (info.picture) existing.picture = info.picture;
+          if (!existing.name && info.name) existing.name = info.name;
+        }
+        saveAccounts(accounts);
+        return send(res, 200, 'application/json', JSON.stringify({
+          ok: true,
+          user: {
+            id: existing.id,
+            email: existing.email,
+            name: existing.name,
+            picture: existing.picture || info.picture || '',
+            provider: 'google',
+            createdAt: existing.createdAt
+          }
+        }));
+      } catch (err) {
+        return send(res, 401, 'application/json', JSON.stringify({ ok: false, error: 'Could not verify Google sign-in token.' }));
+      }
+    }
+
     // Auth: List Accounts (Profiles Page)
     if (req.method === 'GET' && url.pathname === '/api/auth/accounts/list') {
       accounts = loadAccounts();
@@ -998,6 +1063,8 @@ async function requestHandler(req, res) {
         id: a.id,
         email: a.email,
         name: a.name,
+        picture: a.picture || '',
+        provider: a.provider || 'email',
         createdAt: a.createdAt || null
       }));
       return send(res, 200, 'application/json', JSON.stringify({ ok: true, accounts: list }));

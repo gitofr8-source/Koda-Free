@@ -1177,7 +1177,7 @@ function renderNavUser() {
     if (nameEl) nameEl.textContent = u.name || (u.email ? u.email.split('@')[0] : 'User');
     if (avatarEl) {
       if (u.picture) {
-        avatarEl.innerHTML = `<img src="${u.picture}" class="w-full h-full object-cover">`;
+        avatarEl.innerHTML = `<img src="${u.picture}" referrerpolicy="no-referrer" class="w-full h-full object-cover">`;
       } else {
         const initial = (u.name || u.email || 'U').trim().charAt(0).toUpperCase();
         avatarEl.textContent = initial || 'U';

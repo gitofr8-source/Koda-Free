@@ -437,7 +437,7 @@ input:focus, select:focus {
     // Avatar
     const avatarEl = document.getElementById('heroAvatar');
     if (currentUser.picture) {
-      avatarEl.innerHTML = `<img src="${currentUser.picture}" class="w-full h-full object-cover">`;
+      avatarEl.innerHTML = `<img src="${currentUser.picture}" referrerpolicy="no-referrer" class="w-full h-full object-cover">`;
     } else {
       const initial = (name || email).trim().charAt(0).toUpperCase();
       avatarEl.textContent = initial || 'U';
@@ -445,15 +445,23 @@ input:focus, select:focus {
 
     // Badge
     const badge = document.getElementById('heroTypeBadge');
+    const secNotice = document.getElementById('guestSecurityNotice');
     if (isGuest) {
       badge.textContent = 'Guest Session';
       badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/30';
-      document.getElementById('guestSecurityNotice').classList.remove('hidden');
+      secNotice.innerHTML = '<b>Guest Account:</b> You are currently logged in with a guest session. Register an account with email and password to secure your chats across devices.';
+      secNotice.classList.remove('hidden');
+      document.getElementById('formUpdatePassword').classList.add('opacity-40', 'pointer-events-none');
+    } else if (currentUser.provider === 'google') {
+      badge.textContent = 'Google Account';
+      badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-blue-500/10 text-blue-400 border border-blue-500/30';
+      secNotice.innerHTML = '<b>Google Sign-In:</b> Password authentication for this profile is managed directly by your Google account.';
+      secNotice.classList.remove('hidden');
       document.getElementById('formUpdatePassword').classList.add('opacity-40', 'pointer-events-none');
     } else {
       badge.textContent = 'Registered Account';
       badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/30';
-      document.getElementById('guestSecurityNotice').classList.add('hidden');
+      secNotice.classList.add('hidden');
       document.getElementById('formUpdatePassword').classList.remove('opacity-40', 'pointer-events-none');
     }
 
@@ -561,12 +569,13 @@ input:focus, select:focus {
       return `
         <div class="card p-4 rounded-xl border flex items-center justify-between gap-3 ${isCurrent ? 'ring-1 ring-emerald-500/50 bg-emerald-500/[0.03]' : ''}">
           <div class="flex items-center gap-3 min-w-0">
-            <div class="w-10 h-10 rounded-xl bg-white/10 text-white flex items-center justify-center font-bold text-sm border border-white/15 flex-shrink-0">
-              ${initial}
+            <div class="w-10 h-10 rounded-xl bg-white/10 text-white flex items-center justify-center font-bold text-sm border border-white/15 flex-shrink-0 overflow-hidden">
+              ${acc.picture ? `<img src="${acc.picture}" referrerpolicy="no-referrer" class="w-full h-full object-cover">` : initial}
             </div>
             <div class="min-w-0">
               <div class="flex items-center gap-2">
                 <span class="text-xs font-bold text-[var(--text-heading)] truncate">${acc.name || 'User'}</span>
+                ${acc.provider === 'google' ? '<span class="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-blue-500/15 text-blue-400 border border-blue-500/30">Google</span>' : ''}
                 ${isCurrent ? '<span class="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">Active Now</span>' : ''}
               </div>
               <p class="text-[11px] text-[var(--text-muted)] font-mono truncate">${acc.email || 'Local / Guest'}</p>
@@ -579,7 +588,7 @@ input:focus, select:focus {
                 <span>Workspace</span>
               </a>
             ` : `
-              <button type="button" onclick="switchToAccount('${acc.email || ''}')" class="btn !py-1 !px-2.5 text-[11px] font-semibold rounded-lg hover:text-white cursor-pointer" title="Switch to this account">
+              <button type="button" onclick="switchToAccount('${acc.email || ''}', '${acc.provider || 'email'}')" class="btn !py-1 !px-2.5 text-[11px] font-semibold rounded-lg hover:text-white cursor-pointer" title="Switch to this account">
                 Switch
               </button>
               <button type="button" onclick="removeSavedAccount('${acc.email || acc.id}')" class="btn !p-1 text-[11px] text-[#ef4444] hover:!bg-red-500/10 rounded-lg cursor-pointer" title="Forget this account on device">
@@ -652,9 +661,10 @@ input:focus, select:focus {
     return 'h_' + (h >>> 0).toString(16);
   }
 
-  window.switchToAccount = function(email) {
+  window.switchToAccount = function(email, provider) {
     if (!email) return;
-    const loginTarget = 'login.html?switch=1&email=' + encodeURIComponent(email) + '&redirect=' + encodeURIComponent('chat.html');
+    const modeParam = provider === 'google' ? '&mode=google' : '';
+    const loginTarget = 'login.html?switch=1&email=' + encodeURIComponent(email) + modeParam + '&redirect=' + encodeURIComponent('chat.html');
     window.location.href = loginTarget;
   };
 
