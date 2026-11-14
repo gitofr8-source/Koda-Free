@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Download Koda AI — Windows, Android Mobile, Tablet & iOS</title>
+  <meta name="description" content="Download and install Koda AI as a native application for Windows PC (.exe), Android mobile & tablet (.apk / PWA), and iOS.">
+  <meta name="theme-color" content="#000000">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+  <link rel="icon" type="image/png" href="icon.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;500;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: #000;
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      overflow-x: hidden;
+    }
+    .brand-font {
+      font-family: 'Bricolage Grotesque', sans-serif;
+    }
+    .mono-font {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .glass-card {
+      background: rgba(14, 17, 23, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(12px);
+      transition: all 0.2s ease;
+    }
+    .glass-card:hover {
+      border-color: rgba(255, 255, 255, 0.22);
+      transform: translateY(-2px);
+    }
+    .highlight-card {
+      border-color: rgba(16, 185, 129, 0.4) !important;
+      background: rgba(16, 185, 129, 0.05) !important;
+      box-shadow: 0 10px 30px -10px rgba(16, 185, 129, 0.2);
+    }
+    .primary-btn {
+      background: #fff;
+      color: #000;
+      font-weight: 700;
+      transition: all 0.15s ease;
+    }
+    .primary-btn:hover {
+      background: #e2e8f0;
+      transform: scale(1.02);
+    }
+    .secondary-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      font-weight: 600;
+      transition: all 0.15s ease;
+    }
+    .secondary-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+    .emerald-btn {
+      background: #10b981;
+      color: #000;
+      font-weight: 700;
+      transition: all 0.15s ease;
+    }
+    .emerald-btn:hover {
+      background: #34d399;
+      transform: scale(1.02);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+  <!-- Navbar -->
+  <header class="border-b border-white/10 px-6 py-4 flex items-center justify-between max-w-6xl mx-auto w-full">
+    <a href="/" class="flex items-center gap-2.5 text-white no-underline">
+      <img src="icon.png" alt="Koda Logo" class="w-7 h-7 rounded-lg">
+      <span class="brand-font font-bold text-lg tracking-tight">Koda AI</span>
+    </a>
+    <nav class="flex items-center gap-3">
+      <a href="/chat" class="text-xs font-semibold px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-white hover:bg-white/10 transition">Launch Web App ↗</a>
+      <a href="/vault" class="text-xs font-semibold px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition">Server Vault 🔒</a>
+    </nav>
+  </header>
+
+  <!-- Hero Section -->
+  <main class="max-w-6xl mx-auto px-6 py-12 w-full flex-1">
+    <div class="text-center max-w-2xl mx-auto mb-14">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold mb-4">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+        Multi-Platform Desktop & Mobile Apps
+      </div>
+      <h1 class="brand-font text-3xl sm:text-5xl font-extrabold tracking-tight mb-4 leading-tight">
+        Download Koda for Any Device
+      </h1>
+      <p class="text-slate-400 text-sm sm:text-base leading-relaxed">
+        Get the full 6-model AI workspace on your Windows PC, Android phone, tablet, or iPhone. Fast, lightweight, and pre-wired to your Server Vault.
+      </p>
+    </div>
+
+    <!-- Platform Download Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+
+      <!-- Windows Card -->
+      <div id="card-windows" class="glass-card rounded-2xl p-6 flex flex-col justify-between">
+        <div>
+          <div class="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-2xl mb-4 text-blue-400">
+            🪟
+          </div>
+          <div class="flex items-center justify-between mb-1">
+            <h2 class="brand-font text-xl font-bold">Windows PC (.exe)</h2>
+            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-white/10 text-white/80">Win 10 / 11</span>
+          </div>
+          <p class="text-slate-400 text-xs mb-6 leading-relaxed">
+            Native Windows executable installer. Installs Koda as a dedicated standalone desktop app with zero browser toolbars or distractions.
+          </p>
+          <ul class="text-xs text-slate-300 space-y-2 mb-6 font-mono">
+            <li class="flex items-center gap-2"><span class="text-emerald-400">✓</span> Windows Installer (.exe)</li>
+            <li class="flex items-center gap-2"><span class="text-emerald-400">✓</span> Dedicated Desktop Window Mode</li>
+            <li class="flex items-center gap-2"><span class="text-emerald-400">✓</span> Desktop & Start Menu Shortcut</li>
+          </ul>
+        </div>
+        <div class="space-y-2.5">
+          <a href="/Koda-Setup.exe" download="Koda-Setup.exe" class="primary-btn w-full py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 no-underline">
+            <span>Download Koda-Setup.exe</span>
+            <span class="text-xs">↓</span>
+          </a>
+          <a href="/Koda.exe" download="Koda.exe" class="secondary-btn w-full py-2 px-4 rounded-xl text-xs flex items-center justify-center gap-2 no-underline">
+            <span>Portable Launcher (Koda.exe)</span>
+            <span class="text-xs opacity-60">↓</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Android Mobile & Tablet Card -->
+      <div id="card-android" class="glass-card rounded-2xl p-6 flex flex-col justify-between">
+        <div>
+          <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-2xl mb-4 text-emerald-400">
+            📱
+          </div>
+          <div class="flex items-center justify-between mb-1">
+            <h2 class="brand-font text-xl font-bold">Android & Tablet</h2>
+            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">Mobile & Tab</span>
+          </div>
+          <p class="text-slate-400 text-xs mb-6 leading-relaxed">
+            Install directly on any Android phone or tablet. Fast, offline-cached PWA app or raw APK package.
+          </p>
+          <div class="p-2.5 rounded-lg bg-white/5 border border-white/10 text-[11px] text-slate-300 mb-6 leading-relaxed">
+            💡 <b>Note:</b> Android devices run <b>.apk</b> or <b>native PWA apps</b> (not Windows .exe). Tap below to install directly to your home screen!
+          </div>
+        </div>
+        <div class="space-y-2.5">
+          <button id="pwaInstallBtn" onclick="installPWA()" class="emerald-btn w-full py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 cursor-pointer border-none">
+            <span>⚡ Install to Home Screen</span>
+            <span>+</span>
+          </button>
+          <a href="/koda.apk" download="koda.apk" class="secondary-btn w-full py-2 px-4 rounded-xl text-xs flex items-center justify-center gap-2 no-underline">
+            <span>Download Android Package (.apk)</span>
+            <span class="text-xs opacity-60">↓</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- iOS (iPhone & iPad) Card -->
+      <div id="card-ios" class="glass-card rounded-2xl p-6 flex flex-col justify-between">
+        <div>
+          <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-2xl mb-4 text-purple-400">
+            🍏
+          </div>
+          <div class="flex items-center justify-between mb-1">
+            <h2 class="brand-font text-xl font-bold">Apple iOS (iPhone & iPad)</h2>
+            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-white/10 text-white/80">iOS 14+</span>
+          </div>
+          <p class="text-slate-400 text-xs mb-6 leading-relaxed">
+            Install Koda on Safari as a full-screen mobile app with native icon and zero Safari URL bar.
+          </p>
+          <div class="space-y-3 mb-6 bg-white/5 border border-white/10 rounded-xl p-3.5 text-xs text-slate-300">
+            <div class="flex items-start gap-2.5">
+              <span class="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">1</span>
+              <span>Open <b><a href="/chat" class="text-emerald-400 underline">Koda in Safari</a></b></span>
+            </div>
+            <div class="flex items-start gap-2.5">
+              <span class="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">2</span>
+              <span>Tap the <b>Share Button</b> (square with arrow ↑)</span>
+            </div>
+            <div class="flex items-start gap-2.5">
+              <span class="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">3</span>
+              <span>Scroll down and tap <b>"Add to Home Screen"</b> (+)</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <a href="/chat" class="secondary-btn w-full py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 no-underline">
+            <span>Open in Safari / Web</span>
+            <span>↗</span>
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Live Direct Links Section -->
+    <div class="glass-card rounded-2xl p-6 sm:p-8 max-w-3xl mx-auto">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h3 class="brand-font text-lg font-bold mb-1">Looking for Instant Online Access?</h3>
+          <p class="text-xs text-slate-400">Launch the live 6-model workspace directly in your web browser with no download required.</p>
+        </div>
+        <div class="flex gap-2 shrink-0 w-full sm:w-auto">
+          <a href="/chat" class="primary-btn py-2 px-5 rounded-xl text-xs text-center flex-1 sm:flex-none no-underline">
+            Open Web App ↗
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-white/10 py-6 px-6 text-center text-xs text-slate-500">
+    <p>Koda AI Frontier Workspace • Built with Google Gemini, ChatGPT, Claude, Perplexity & DeepSeek Personas.</p>
+  </footer>
+
+  <script>
+    // Detect OS and highlight recommended card
+    const ua = navigator.userAgent || '';
+    const isWindows = /windows|win32/i.test(ua);
+    const isAndroid = /android/i.test(ua);
+    const isIOS = /iphone|ipad|ipod/i.test(ua);
+
+    if (isWindows) {
+      document.getElementById('card-windows')?.classList.add('highlight-card');
+    } else if (isAndroid) {
+      document.getElementById('card-android')?.classList.add('highlight-card');
+    } else if (isIOS) {
+      document.getElementById('card-ios')?.classList.add('highlight-card');
+    }
+
+    // PWA Install Handling
+    let deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const btn = document.getElementById('pwaInstallBtn');
+      if (btn) btn.innerHTML = '<span>⚡ Tap to Install App</span> <span>+</span>';
+    });
+
+    function installPWA() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choice) => {
+          if (choice.outcome === 'accepted') {
+            alert('✓ Koda installed successfully! Check your home screen or app launcher.');
+          }
+          deferredPrompt = null;
+        });
+      } else {
+        if (/android/i.test(navigator.userAgent)) {
+          alert('To install Koda on your Android phone or tablet:\n\n1. In Chrome / Samsung Internet, tap the 3 dots (⋮) in the top-right.\n2. Tap "Install App" or "Add to Home screen".\n3. Tap "Install". Koda will install directly as a native app with its own icon!');
+        } else if (/windows/i.test(navigator.userAgent)) {
+          alert('To install as an app on Windows:\n\n1. Download Koda-Setup.exe above, OR\n2. In Chrome/Edge, click the Install (⊕) icon in the address bar.');
+        } else {
+          location.href = '/chat';
+        }
+      }
+    }
+  </script>
+</body>
+</html>

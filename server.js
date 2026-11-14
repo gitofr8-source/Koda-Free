@@ -927,14 +927,35 @@ async function requestHandler(req, res) {
       });
     }
 
-    // Direct Installer EXE Download
-    if (req.method === 'GET' && (url.pathname === '/download' || url.pathname === '/download/exe' || url.pathname === '/Koda-Setup.exe')) {
+    // Download Hub Page
+    if (req.method === 'GET' && (url.pathname === '/download' || url.pathname === '/download.html' || url.pathname === '/apps')) {
+      const dlFile = path.join(DIR, 'download.html');
+      if (fs.existsSync(dlFile)) {
+        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' });
+        return fs.createReadStream(dlFile).pipe(res);
+      }
+    }
+
+    // Direct Windows Executable Downloads (Koda-Setup.exe and Koda.exe)
+    if (req.method === 'GET' && (url.pathname === '/download/exe' || url.pathname === '/Koda-Setup.exe')) {
       const exeFile = path.join(DIR, 'Koda-Setup.exe');
       if (fs.existsSync(exeFile)) {
         const st = fs.statSync(exeFile);
         res.writeHead(200, {
           'Content-Type': 'application/vnd.microsoft.portable-executable',
           'Content-Disposition': 'attachment; filename="Koda-Setup.exe"',
+          'Content-Length': st.size
+        });
+        return fs.createReadStream(exeFile).pipe(res);
+      }
+    }
+    if (req.method === 'GET' && url.pathname === '/Koda.exe') {
+      const exeFile = path.join(DIR, 'Koda.exe');
+      if (fs.existsSync(exeFile)) {
+        const st = fs.statSync(exeFile);
+        res.writeHead(200, {
+          'Content-Type': 'application/vnd.microsoft.portable-executable',
+          'Content-Disposition': 'attachment; filename="Koda.exe"',
           'Content-Length': st.size
         });
         return fs.createReadStream(exeFile).pipe(res);

@@ -10,6 +10,8 @@
     { "source": "/accounts", "destination": "/profile.html" },
     { "source": "/signin", "destination": "/login.html" },
     { "source": "/auth", "destination": "/login.html" },
+    { "source": "/download", "destination": "/download.html" },
+    { "source": "/apps", "destination": "/download.html" },
     { "source": "/vault", "destination": "/api/index.js" },
     { "source": "/admin", "destination": "/api/index.js" },
     { "source": "/api/(.*)", "destination": "/api/index.js" },
