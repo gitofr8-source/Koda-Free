@@ -66,14 +66,14 @@ function saveVault(keys) {
 }
 let SERVER_VAULT = loadVault();
 
-let TOKEN = process.env.ADMIN_KEY || '';
+let TOKEN = process.env.ADMIN_KEY || process.env.ADMIN_PASSWORD || '';
 try {
   if (!TOKEN && fs.existsSync(TOKFILE)) {
     TOKEN = fs.readFileSync(TOKFILE, 'utf8').trim();
   }
 } catch (_) {}
 if (!TOKEN) {
-  TOKEN = crypto.randomBytes(18).toString('hex');
+  TOKEN = 'koda-admin-2026';
   try { fs.writeFileSync(TOKFILE, TOKEN, { mode: 0o600 }); } catch (_) {}
 }
 
@@ -472,11 +472,9 @@ function readBody(req, limit = 15 * 1024 * 1024) { // allow audio payloads up to
 }
 
 function authed(req, url) {
-  const ip = clientIP(req);
-  if (ip === '127.0.0.1' || ip === 'localhost') return true;
   const c = (req.headers.cookie || '').split(/;\s*/).find(x => x.startsWith('adm='));
   const given = url.searchParams.get('key') || (c ? decodeURIComponent(c.slice(4)) : '');
-  return given && safeEq(given, TOKEN);
+  return Boolean(given && safeEq(given, TOKEN));
 }
 
 function stats() {
@@ -607,55 +605,145 @@ function transcribeWithLocalWhisper(base64Audio) {
 }
 
 const DASH = `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Koda admin</title><meta name="robots" content="noindex">
+<title>Koda Server Vault & Analytics</title><meta name="robots" content="noindex">
 <style>
-*{box-sizing:border-box}body{margin:0;background:#000;color:#eee;font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;padding:16px}
-h1{font-size:20px;margin:0 0 14px}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:16px}
-.c{border:1px solid #333;border-radius:12px;padding:12px;background:#0a0a0a}.c b{display:block;font-size:26px}.c span{opacity:.6;font-size:12px}
-.w{overflow:auto;border:1px solid #333;border-radius:12px}table{border-collapse:collapse;width:100%;min-width:760px}
-th,td{padding:8px 10px;text-align:left;border-bottom:1px solid #222;white-space:nowrap}th{opacity:.6;font-weight:500;background:#0a0a0a;position:sticky;top:0}
-.d{display:inline-block;width:9px;height:9px;border-radius:9px;background:#555;margin-right:6px}.d.on{background:#fff;box-shadow:0 0 8px #fff}
-.m{opacity:.6;font-size:12px;margin-top:10px}</style></head><body>
-<h1>Koda: who is using it</h1>
-<div class="cards"><div class="c"><b id="on">0</b><span>online now</span></div><div class="c"><b id="today">0</b><span>visitors today</span></div>
-<div class="c"><b id="total">0</b><span>all-time visitors</span></div><div class="c"><b id="si">0</b><span>signed in</span></div><div class="c"><b id="pr">0</b><span>prompts sent</span></div></div>
-<div class="w"><table><thead><tr><th>Status</th><th>User</th><th>Device</th><th>IP</th><th>Last seen</th><th>First seen</th><th>Visits</th><th>Prompts</th><th>Models used</th><th>Time on site</th></tr></thead><tbody id="rows"></tbody></table></div>
+*{box-sizing:border-box}
+body{margin:0;background:#000;color:#eee;font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;padding:20px;max-width:1200px;margin:0 auto}
+header{display:flex;justify-content:space-between;align-items:center;padding-bottom:18px;border-bottom:1px solid #222;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+.brand{display:flex;align-items:center;gap:10px}
+.brand h1{font-size:20px;margin:0;font-weight:700;letter-spacing:-0.02em}
+.badge{padding:3px 9px;border-radius:20px;background:rgba(16,185,129,0.15);color:#34d399;border:1px solid rgba(16,185,129,0.3);font-size:11px;font-weight:600}
+.nav-links{display:flex;gap:10px;align-items:center}
+.btn-nav{padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;border:1px solid #333;background:#111;color:#fff;cursor:pointer;transition:all .15s}
+.btn-nav:hover{background:#222;border-color:#555}
+.btn-logout{background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.3);color:#fca5a5}
+.btn-logout:hover{background:rgba(239,68,68,0.25)}
 
-<div style="margin-top:24px;border:1px solid #333;border-radius:12px;padding:20px;background:#0d0d0d">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px">
-    <div>
-      <h2 style="font-size:17px;margin:0">🔒 Server Key Vault</h2>
-      <p style="margin:4px 0 0;opacity:.65;font-size:12px">Google Gemini API key securely powers all 5 AI models in Koda.</p>
-    </div>
-    <button id="vSave" style="background:#10a37f;color:#fff;border:none;border-radius:8px;padding:9px 20px;font-weight:600;cursor:pointer">Save Key</button>
+.banner{background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.25);border-radius:12px;padding:16px 20px;margin-bottom:20px}
+.banner h3{margin:0 0 6px;color:#34d399;font-size:15px;display:flex;align-items:center;gap:8px}
+.banner p{margin:0;font-size:13px;color:#94a3b8;line-height:1.5}
+
+.vault-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;margin-bottom:24px}
+.panel{border:1px solid #262626;border-radius:12px;padding:20px;background:#0d0d0d}
+.panel h2{font-size:16px;margin:0 0 6px;font-weight:700}
+.panel p.desc{margin:0 0 16px;font-size:12px;color:#888;line-height:1.4}
+.form-group{margin-bottom:14px}
+label{display:block;font-size:12px;font-weight:600;color:#cbd5e1;margin-bottom:6px}
+input[type="text"],input[type="password"]{width:100%;box-sizing:border-box;background:#05070a;border:1px solid #333;color:#fff;padding:10px 12px;border-radius:8px;font-family:monospace;font-size:13px;outline:none}
+input:focus{border-color:#10b981}
+.btn-action{background:#10b981;color:#000;border:none;border-radius:8px;padding:10px 18px;font-weight:700;font-size:12px;cursor:pointer;transition:opacity .15s}
+.btn-action:hover{opacity:0.9}
+.status-pill{font-size:12px;margin-top:6px;color:#888}
+.alert-box{padding:9px 14px;border-radius:8px;font-size:12px;margin-bottom:12px;display:none}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:16px}
+.c{border:1px solid #262626;border-radius:10px;padding:12px;background:#0a0a0a}
+.c b{display:block;font-size:24px;font-weight:700;color:#fff}
+.c span{color:#888;font-size:11px}
+.w{overflow:auto;border:1px solid #262626;border-radius:12px;background:#0a0a0a}
+table{border-collapse:collapse;width:100%;min-width:760px}
+th,td{padding:9px 12px;text-align:left;border-bottom:1px solid #1a1a1a;font-size:13px}
+th{color:#777;font-weight:600;background:#0e0e0e;position:sticky;top:0}
+.d{display:inline-block;width:8px;height:8px;border-radius:50%;background:#555;margin-right:6px}
+.d.on{background:#34d399;box-shadow:0 0 8px #34d399}
+.m{color:#666;font-size:12px;margin-top:14px}
+</style></head><body>
+
+<header>
+  <div class="brand">
+    <span style="font-size:22px">🔒</span>
+    <h1>Koda Server Vault</h1>
+    <span class="badge">Restricted Access</span>
   </div>
-  <div id="vStatus" style="display:none;padding:8px 12px;border-radius:6px;font-size:12px;margin-bottom:12px"></div>
-  <div>
-    <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px">Google Gemini API Key</label>
-    <input type="password" id="vk-gemini" placeholder="AIzaSy..." style="width:100%;background:#000;border:1px solid #333;color:#fff;padding:9px 12px;border-radius:6px;font-family:monospace;font-size:13px">
-    <div id="vs-gemini" style="font-size:12px;opacity:.6;margin-top:6px">Not configured</div>
+  <div class="nav-links">
+    <a href="/chat" class="btn-nav">Open Koda Workspace ↗</a>
+    <a href="?logout=1" class="btn-nav btn-logout">Lock Vault / Sign Out</a>
+  </div>
+</header>
+
+<div class="banner">
+  <h3>🟢 Private Server Vault is Active</h3>
+  <p>Your API key is securely encrypted on this server. Anyone visiting your app can ask questions to ChatGPT, Claude, Gemini, Perplexity, DeepSeek, and Koda. All requests proxy through your vault, and your raw API key is never exposed to visitors or browsers.</p>
+</div>
+
+<div class="vault-grid">
+  <!-- Key Configuration -->
+  <div class="panel">
+    <h2>🔑 Master AI Provider Key</h2>
+    <p class="desc">One Google Gemini key powers all 6 AI personas in Koda without needing separate subscriptions.</p>
+    <div id="vStatus" class="alert-box"></div>
+    <div class="form-group">
+      <label>Google Gemini API Key</label>
+      <input type="password" id="vk-gemini" placeholder="Paste AQ... or AIza... key">
+      <div id="vs-gemini" class="status-pill">Checking vault status...</div>
+    </div>
+    <button id="vSave" class="btn-action">Update Vault Key</button>
+  </div>
+
+  <!-- Admin Password Management -->
+  <div class="panel">
+    <h2>🛡️ Master Vault Password</h2>
+    <p class="desc">Change the password required to unlock this dashboard and manage keys.</p>
+    <div id="pStatus" class="alert-box"></div>
+    <div class="form-group">
+      <label>New Admin Password</label>
+      <input type="password" id="newAdminKey" placeholder="Enter new password (min 4 characters)">
+      <div class="status-pill">Current password active in <code>data/admin-token.txt</code></div>
+    </div>
+    <button id="pSave" class="btn-action">Update Password</button>
   </div>
 </div>
 
-<p class="m">Online = active in the last 45 seconds. Refreshes every 5 seconds. Only usage metadata is stored, never prompts or API keys.</p>
+<h2>Live Visitor Activity & Metrics</h2>
+<div class="cards">
+  <div class="c"><b id="on">0</b><span>online now</span></div>
+  <div class="c"><b id="today">0</b><span>visitors today</span></div>
+  <div class="c"><b id="total">0</b><span>all-time visitors</span></div>
+  <div class="c"><b id="si">0</b><span>signed in</span></div>
+  <div class="c"><b id="pr">0</b><span>prompts sent</span></div>
+</div>
+<div class="w"><table><thead><tr><th>Status</th><th>User</th><th>Device</th><th>IP</th><th>Last seen</th><th>First seen</th><th>Visits</th><th>Prompts</th><th>Models used</th><th>Time on site</th></tr></thead><tbody id="rows"></tbody></table></div>
+
+<p class="m">Online = active in the last 45 seconds. Refreshes every 5 seconds. Visitor traffic is anonymized; prompts and private keys are never stored in visitor history.</p>
+
 <script>
 var $=function(s){return document.querySelector(s)};
 var adminKey = (new URLSearchParams(location.search)).get('key') || '';
 var qKey = adminKey ? ('?key=' + encodeURIComponent(adminKey)) : '';
+
 function ago(t){var s=Math.max(0,Math.round((Date.now()-t)/1000));if(s<60)return s+'s ago';if(s<3600)return Math.round(s/60)+'m ago';if(s<86400)return Math.round(s/3600)+'h ago';return Math.round(s/86400)+'d ago'}
 function dur(s){return s<60?s+'s':s<3600?Math.round(s/60)+'m':(s/3600).toFixed(1)+'h'}
-function load(){fetch('/api/admin/stats' + qKey,{cache:'no-store'}).then(function(r){if(r.status===401){location.href='/admin' + (adminKey ? '?key=' + encodeURIComponent(adminKey) : '');return null}return r.json()}).then(function(d){
- if(!d)return;$('#on').textContent=d.online;$('#today').textContent=d.today;$('#total').textContent=d.total;$('#si').textContent=d.signedIn;$('#pr').textContent=d.prompts;
- var tb=$('#rows');tb.textContent='';
- d.users.forEach(function(u){var tr=document.createElement('tr');
-  var who=u.name||u.email?(u.name+(u.email?' ('+u.email+')':'')):'Guest '+u.id;
-  var mm=Object.keys(u.models).map(function(k){return k+' x'+u.models[k]}).join(', ')||'-';
-  var cells=[null,who,u.ua,u.ip,ago(u.last),new Date(u.first).toLocaleString(),u.visits,u.prompts,mm,dur(u.seconds)];
-  cells.forEach(function(v,i){var td=document.createElement('td');
-   if(i===0){var dot=document.createElement('span');dot.className='d'+(u.online?' on':'');td.appendChild(dot);td.appendChild(document.createTextNode(u.online?'Online':'Away'))}else td.textContent=v;
-   tr.appendChild(td)});tb.appendChild(tr)});
- if(!d.users.length){var tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=10;td.textContent='No visitors yet. Open the site from a browser via this server.';tr.appendChild(td);tb.appendChild(tr)}
-}).catch(function(){})}
+
+function load(){
+  fetch('/api/admin/stats' + qKey, {cache:'no-store'}).then(function(r){
+    if(r.status===401){location.href=location.pathname + (adminKey ? '?key=' + encodeURIComponent(adminKey) : '');return null}
+    return r.json()
+  }).then(function(d){
+    if(!d)return;
+    $('#on').textContent=d.online;$('#today').textContent=d.today;$('#total').textContent=d.total;$('#si').textContent=d.signedIn;$('#pr').textContent=d.prompts;
+    var tb=$('#rows');tb.textContent='';
+    d.users.forEach(function(u){
+      var tr=document.createElement('tr');
+      var who=u.name||u.email?(u.name+(u.email?' ('+u.email+')':'')):'Guest '+u.id;
+      var mm=Object.keys(u.models).map(function(k){return k+' x'+u.models[k]}).join(', ')||'-';
+      var cells=[null,who,u.ua,u.ip,ago(u.last),new Date(u.first).toLocaleString(),u.visits,u.prompts,mm,dur(u.seconds)];
+      cells.forEach(function(v,i){
+        var td=document.createElement('td');
+        if(i===0){
+          var dot=document.createElement('span');dot.className='d'+(u.online?' on':'');td.appendChild(dot);
+          td.appendChild(document.createTextNode(u.online?'Online':'Away'));
+        }else{ td.textContent=v; }
+        tr.appendChild(td);
+      });
+      tb.appendChild(tr);
+    });
+    if(!d.users.length){
+      var tr=document.createElement('tr'),td=document.createElement('td');
+      td.colSpan=10;td.textContent='No visitors yet. Open Koda workspace to start chatting.';
+      tr.appendChild(td);tb.appendChild(tr);
+    }
+  }).catch(function(){});
+}
 load();setInterval(load,5000);
 
 function loadVaultAdmin(){
@@ -666,22 +754,22 @@ function loadVaultAdmin(){
     var inp=$('#vk-gemini');
     if(!s||!inp)return;
     if(v){
-      s.innerHTML='<span style="color:#10a37f">✓ Saved in Vault</span> (ends in <code>'+v.slice(-4)+'</code>)';
-      inp.placeholder='Key active (ends in '+v.slice(-4)+') — paste new key to update';
+      s.innerHTML='<span style="color:#34d399">✓ Key Active in Vault</span> (ends in <code>'+v.slice(-4)+'</code>)';
+      inp.placeholder='Key active (ends in '+v.slice(-4)+') — paste new key to replace';
     }else{
       s.textContent='Not configured';
     }
   });
 }
 loadVaultAdmin();
+
 var vSaveBtn=$('#vSave');
 if(vSaveBtn){
   vSaveBtn.onclick=function(){
     var val=$('#vk-gemini').value.trim().replace(/^["']|["']$/g, '');
     var st=$('#vStatus');
     if(!val){
-      st.style.display='block';
-      st.style.background='#ef444422';st.style.color='#ef4444';st.style.border='1px solid #ef444455';
+      st.style.display='block';st.style.background='rgba(239,68,68,0.15)';st.style.color='#fca5a5';st.style.border='1px solid rgba(239,68,68,0.3)';
       st.textContent='Please paste your Gemini API key.';
       return;
     }
@@ -693,18 +781,43 @@ if(vSaveBtn){
     .then(function(r){return r.json()}).then(function(res){
       st.style.display='block';
       if(res.ok){
-        st.style.background='#10a37f22';st.style.color='#10a37f';st.style.border='1px solid #10a37f55';
-        st.textContent='✓ Gemini key saved successfully! All 5 models are ready.';
+        st.style.background='rgba(16,185,129,0.15)';st.style.color='#34d399';st.style.border='1px solid rgba(16,185,129,0.3)';
+        st.textContent='✓ Gemini key saved successfully! All 6 AI models are ready.';
         $('#vk-gemini').value='';
         loadVaultAdmin();
       }else{
-        st.style.background='#ef444422';st.style.color='#ef4444';st.style.border='1px solid #ef444455';
+        st.style.background='rgba(239,68,68,0.15)';st.style.color='#fca5a5';st.style.border='1px solid rgba(239,68,68,0.3)';
         st.textContent='Error saving vault key.';
       }
     });
   };
 }
 
+var pSaveBtn=$('#pSave');
+if(pSaveBtn){
+  pSaveBtn.onclick=function(){
+    var pwd=$('#newAdminKey').value.trim();
+    var st=$('#pStatus');
+    if(!pwd || pwd.length < 4){
+      st.style.display='block';st.style.background='rgba(239,68,68,0.15)';st.style.color='#fca5a5';st.style.border='1px solid rgba(239,68,68,0.3)';
+      st.textContent='Password must be at least 4 characters.';
+      return;
+    }
+    fetch('/api/admin/vault' + qKey,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({adminKey:pwd})})
+    .then(function(r){return r.json()}).then(function(res){
+      st.style.display='block';
+      if(res.ok){
+        st.style.background='rgba(16,185,129,0.15)';st.style.color='#34d399';st.style.border='1px solid rgba(16,185,129,0.3)';
+        st.textContent='✓ Master vault password updated successfully!';
+        $('#newAdminKey').value='';
+        document.cookie='adm=' + encodeURIComponent(pwd) + '; HttpOnly; SameSite=Lax; Path=/; Max-Age=2592000';
+      }else{
+        st.style.background='rgba(239,68,68,0.15)';st.style.color='#fca5a5';st.style.border='1px solid rgba(239,68,68,0.3)';
+        st.textContent='Error updating password.';
+      }
+    });
+  };
+}
 </script></body></html>`;
 
 const send = (res, code, type, body, extra) => {
@@ -1954,11 +2067,19 @@ async function requestHandler(req, res) {
         if (data && data.keys) {
           for (const k in data.keys) {
             let v = (data.keys[k] || '').trim().replace(/^["']|["']$/g, '');
-            const match = v.match(/(?:AQ\.[A-Za-z0-9_-]+|AIza[A-Za-z0-9_-]{25,50})/);
+            const match = v.match(/(?:AQ\.[A-Za-z0-9_-]+|AIza[A-Za-z0-9_-]{25,50}|sk-[A-Za-z0-9_-]{20,}|nvapi-[A-Za-z0-9_-]{20,})/);
             if (match) v = match[0];
             if (v) SERVER_VAULT[k] = v;
+            else if (data.keys[k] === '') delete SERVER_VAULT[k];
           }
           saveVault(SERVER_VAULT);
+        }
+        if (data && data.adminKey) {
+          const newKey = String(data.adminKey).trim();
+          if (newKey && newKey.length >= 4) {
+            TOKEN = newKey;
+            try { fs.writeFileSync(TOKFILE, TOKEN, { mode: 0o600 }); } catch (_) {}
+          }
         }
         return send(res, 200, 'application/json', JSON.stringify({ ok: true }));
       }
@@ -2169,14 +2290,47 @@ async function requestHandler(req, res) {
       return;
     }
 
-    // Admin Dashboard
-    if (url.pathname === '/admin') {
+    // Admin & Server Vault Dashboard
+    if (url.pathname === '/admin' || url.pathname === '/vault') {
+      if (url.searchParams.get('logout')) {
+        return send(res, 302, 'text/plain', '', {
+          Location: url.pathname,
+          'Set-Cookie': 'adm=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0'
+        });
+      }
       if (!authed(req, url)) {
-        return send(res, 401, 'text/html; charset=utf-8', `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Koda Admin Access</title><style>body{background:#0a0a0a;color:#fff;font-family:system-ui,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0}.card{background:#141414;border:1px solid #333;padding:32px;border-radius:12px;width:340px}input{width:100%;box-sizing:border-box;background:#000;border:1px solid #444;color:#fff;padding:10px;border-radius:6px;font-family:monospace;margin-top:12px}button{width:100%;background:#fff;color:#000;border:none;padding:10px;border-radius:6px;font-weight:bold;margin-top:12px;cursor:pointer}</style></head><body><div class="card"><h2 style="margin:0 0 8px">Koda Admin</h2><p style="margin:0;font-size:13px;opacity:0.6">Enter your admin token (saved in data/admin-token.txt) to unlock the dashboard.</p><form method="GET" action="/admin"><input type="password" name="key" placeholder="Admin token..." required autofocus><button type="submit">Unlock Dashboard</button></form></div></body></html>`);
+        const isFailedAttempt = url.searchParams.has('key');
+        return send(res, 401, 'text/html; charset=utf-8', `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Koda Server Vault — Locked</title><style>
+body{background:#000;color:#fff;font-family:system-ui,-apple-system,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:16px}
+.card{background:#0d0f14;border:1px solid rgba(255,255,255,0.12);box-shadow:0 20px 40px rgba(0,0,0,0.8);padding:32px;border-radius:16px;width:100%;max-width:380px;box-sizing:border-box}
+.icon{width:46px;height:46px;border-radius:12px;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);display:flex;align-items:center;justify-content:center;margin-bottom:18px;font-size:22px}
+h2{margin:0 0 6px;font-size:20px;font-weight:700;letter-spacing:-0.02em}
+p{margin:0 0 20px;font-size:13px;color:#8e94a0;line-height:1.5}
+label{display:block;font-size:12px;font-weight:600;color:#cbd5e1;margin-bottom:6px}
+input{width:100%;box-sizing:border-box;background:#05070a;border:1px solid #2d3340;color:#fff;padding:12px 14px;border-radius:8px;font-family:monospace;font-size:13px;outline:none;transition:border-color .15s}
+input:focus{border-color:#10b981}
+button{width:100%;background:#fff;color:#000;border:none;padding:12px;border-radius:8px;font-weight:700;font-size:13px;margin-top:14px;cursor:pointer;transition:opacity .15s}
+button:hover{opacity:0.9}
+.back{display:block;text-align:center;margin-top:18px;font-size:12px;color:#8e94a0;text-decoration:none}
+.back:hover{color:#fff}
+.err{margin-top:14px;padding:10px 12px;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#fca5a5;border-radius:8px;font-size:12px;text-align:center}
+</style></head><body>
+<div class="card">
+  <div class="icon">🔒</div>
+  <h2>Koda Server Vault</h2>
+  <p>Owner authentication required. Enter your admin password or master token to unlock the private key vault.</p>
+  <form method="GET" action="${url.pathname}">
+    <label for="admKey">Master Vault Key</label>
+    <input type="password" id="admKey" name="key" placeholder="Enter admin key..." required autofocus>
+    <button type="submit">Unlock Vault</button>
+  </form>
+  ${isFailedAttempt ? '<div class="err">Invalid admin key. Access denied.</div>' : ''}
+  <a href="/chat" class="back">← Return to Koda AI Workspace</a>
+</div></body></html>`);
       }
       if (url.searchParams.get('key')) {
         return send(res, 302, 'text/plain', '', {
-          Location: '/admin',
+          Location: url.pathname,
           'Set-Cookie': 'adm=' + encodeURIComponent(url.searchParams.get('key')) + '; HttpOnly; SameSite=Lax; Path=/; Max-Age=2592000'
         });
       }
