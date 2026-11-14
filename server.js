@@ -43,18 +43,23 @@ try { supportTickets = JSON.parse(fs.readFileSync(SUPPORT_FILE, 'utf8')); } catc
 
 const VAULT_FILE = path.join(DATA, 'server-keys.json');
 function loadVault() {
+  let v = {};
   if (!fs.existsSync(VAULT_FILE)) {
     const seed = path.join(DIR, 'data', 'server-keys.json');
     if (fs.existsSync(seed)) {
       try {
         const d = fs.readFileSync(seed, 'utf8');
         try { fs.writeFileSync(VAULT_FILE, d); } catch (_) {}
-        return JSON.parse(d || '{}');
+        v = JSON.parse(d || '{}');
       } catch (_) {}
     }
-    return {};
+  } else {
+    try { v = JSON.parse(fs.readFileSync(VAULT_FILE, 'utf8') || '{}'); } catch (_) { v = {}; }
   }
-  try { return JSON.parse(fs.readFileSync(VAULT_FILE, 'utf8') || '{}'); } catch (_) { return {}; }
+  if (!v.gemini && process.env.GEMINI_API_KEY) {
+    v.gemini = process.env.GEMINI_API_KEY.trim();
+  }
+  return v;
 }
 function saveVault(keys) {
   try { fs.writeFileSync(VAULT_FILE, JSON.stringify(keys, null, 2), { mode: 0o600 }); return true; } catch (_) { return false; }
