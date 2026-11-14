@@ -25,6 +25,14 @@ __pycache__/
 *.mobileconfig
 *.dmg
 
+# Allow lightweight app distribution binaries (<200KB)
+!Koda-Setup.exe
+!Koda.exe
+!koda.apk
+!www/Koda-Setup.exe
+!www/Koda.exe
+!www/koda.apk
+
 # External local folders and legacy archives
 science spectrum allen/
 spacedesk/
