@@ -143,7 +143,7 @@ const companionState = {
 };
 
 // Universal Direct Server-Side AI Engine (Zero Chrome / Zero Web Apps / Zero Central API Keys required)
-function streamDirectEngine(req, res, messages, modelName = 'gemini-3.1-flash-lite') {
+function streamDirectEngine(req, res, messages, modelName = 'gemini-3.5-flash-lite') {
   if (res.writableEnded || res.destroyed) return;
   if (!res.headersSent) {
     res.writeHead(200, {
@@ -180,8 +180,8 @@ function streamDirectEngine(req, res, messages, modelName = 'gemini-3.1-flash-li
     if (systemInstruction) gemBody.systemInstruction = systemInstruction;
 
     const postPayload = JSON.stringify(gemBody);
-    const chosenInitial = (modelName && !['gemini-3.5-flash-lite', 'gemini-3.5-flash', 'gemini-flash-lite-latest', 'gemini-2.5-flash'].includes(modelName)) ? modelName : 'gemini-3.1-flash-lite';
-    const fallbackModels = [...new Set([chosenInitial, 'gemini-3.1-flash-lite', 'gemini-3.1-flash-lite-preview', 'gemini-3-flash-preview', 'gemma-4-26b-a4b-it'])];
+    const chosenInitial = (modelName && !['gemini-2.5-flash'].includes(modelName)) ? modelName : 'gemini-3.5-flash-lite';
+    const fallbackModels = [...new Set([chosenInitial, 'gemini-3.5-flash-lite', 'gemini-3-flash-preview', 'gemma-4-26b-a4b-it'])];
     let hasSentAnyToken = false;
 
     const tryDirectModel = (mIdx) => {
@@ -1752,7 +1752,7 @@ async function requestHandler(req, res) {
         { role: 'system', content: 'You are Gemini by Google. Provide an insightful, comprehensive, cutting-edge, and highly articulate answer.' },
         { role: 'user', content: promptText }
       ];
-      return streamDirectEngine(req, res, messages, 'gemini-3.1-flash-lite');
+      return streamDirectEngine(req, res, messages, 'gemini-3.5-flash-lite');
     }
 
     // Send Prompt and Stream Response via Perplexity Direct Mirror Engine
@@ -1766,7 +1766,7 @@ async function requestHandler(req, res) {
         { role: 'system', content: 'You are Perplexity AI. Provide an accurate, authoritative, fact-checked, and concise response with clear explanations.' },
         { role: 'user', content: promptText }
       ];
-      return streamDirectEngine(req, res, messages, 'gemini-3.1-flash-lite-preview');
+      return streamDirectEngine(req, res, messages, 'gemini-3.5-flash-lite');
     }
 
     // Send Prompt and Stream Response via DeepSeek Direct Mirror Engine
@@ -2143,10 +2143,10 @@ async function requestHandler(req, res) {
       }
 
       if (modelId === 'koda' || modelId === 'gemini' || (!SERVER_VAULT[modelId] && SERVER_VAULT['gemini'])) {
-        const defaultGeminiModel = 'gemini-3.1-flash-lite';
+        const defaultGeminiModel = 'gemini-3.5-flash-lite';
         const isGoogleModel = (payload.model || '').startsWith('gemini') || (payload.model || '').startsWith('gemma');
-        const primaryModel = isGoogleModel && !['gemini-3.5-flash-lite', 'gemini-3.5-flash', 'gemini-flash-lite-latest', 'gemini-2.5-flash'].includes(payload.model) ? payload.model : defaultGeminiModel;
-        const tryModels = [...new Set([primaryModel, 'gemini-3.1-flash-lite', 'gemini-3.1-flash-lite-preview', 'gemini-3-flash-preview', 'gemma-4-26b-a4b-it'])];
+        const primaryModel = isGoogleModel && !['gemini-2.5-flash'].includes(payload.model) ? payload.model : defaultGeminiModel;
+        const tryModels = [...new Set([primaryModel, 'gemini-3.5-flash-lite', 'gemini-3-flash-preview', 'gemma-4-26b-a4b-it'])];
         let reqBody = payload.body || {};
         if (!reqBody.messages && payload.messages) reqBody.messages = payload.messages;
         if (!reqBody.contents && payload.contents) reqBody.contents = payload.contents;

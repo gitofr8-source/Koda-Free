@@ -1121,7 +1121,17 @@ S.on['koda'] = true;
 S.lead = 'koda';
 if (S.tab !== 'spotify') S.tab = 'koda';
 sv('hub_on',S.on); sv('hub_lead',S.lead); sv('hub_tab',S.tab); sv('hub_routes',S.routes);
-const GMAP={koda:'gemini-3.1-flash-lite',openai:'gemini-3.1-flash-lite',anthropic:'gemini-3.1-flash-lite-preview',perplexity:'gemini-3.1-flash-lite-preview',deepseek:'gemini-3-flash-preview',gemini:'gemini-3.1-flash-lite'};
+const GMAP={koda:'gemini-3.5-flash-lite',openai:'gemini-3.5-flash-lite',anthropic:'gemini-3.5-flash-lite',perplexity:'gemini-3.5-flash-lite',deepseek:'gemini-3.5-flash-lite',gemini:'gemini-3.5-flash-lite'};
+const PUBLIC_API_ORIGIN = 'https://arthritis-rely-visitor-stones.trycloudflare.com';
+function getApiEndpoint(p) {
+  if (!p) return '';
+  if (p.startsWith('http://') || p.startsWith('https://')) return p;
+  const path = p.startsWith('/') ? p : '/' + p;
+  if (location.protocol.startsWith('http') && !location.hostname.endsWith('github.io')) {
+    return path;
+  }
+  return PUBLIC_API_ORIGIN + path;
+}
 const NMAP={koda:'nvidia/llama-3.1-nemotron-70b-instruct',openai:'nvidia/llama-3.1-nemotron-70b-instruct',anthropic:'mistralai/mistral-large-2-instruct',gemini:'google/gemma-3-12b-it',perplexity:'nvidia/mistral-nemo-minitron-8b-8k-instruct',deepseek:'deepseek-ai/deepseek-v4.1-flash'};
 const CONFIGS={
   koda:{temperature:0.7,topP:0.95},
@@ -1251,7 +1261,7 @@ async function readSSE(res,onData,signal){
 }
 async function errOf(res){let t='';try{t=await res.text();const j=JSON.parse(t);t=j.error?.message||j.error||t}catch{}return `HTTP ${res.status}: ${String(t).slice(0,300)}`}
 async function callModel(id,prompt,onTok,signal){
-  const hasServerApi = location.protocol.startsWith('http') && !location.hostname.endsWith('github.io');
+  const hasServerApi = (location.protocol.startsWith('http') && !location.hostname.endsWith('github.io')) || !!PUBLIC_API_ORIGIN;
   if (hasServerApi && window.vaultPromise && (!S.vaultAvailable || !S.vaultAvailable.length)) {
     try { await window.vaultPromise; } catch (_) {}
   }
@@ -1279,7 +1289,7 @@ async function callModel(id,prompt,onTok,signal){
       }, 30000);
 
       try {
-        let res = await fetch('/api/chatgpt/mirror/send', {
+        let res = await fetch(getApiEndpoint('/api/chatgpt/mirror/send'), {
           method: 'POST',
           signal: internalAbort.signal,
           headers: { 'content-type': 'application/json' },
@@ -1412,7 +1422,7 @@ async function callModel(id,prompt,onTok,signal){
       }, 30000);
 
       try {
-        let res = await fetch('/api/claude/mirror/send', {
+        let res = await fetch(getApiEndpoint('/api/claude/mirror/send'), {
           method: 'POST',
           signal: internalAbort.signal,
           headers: { 'content-type': 'application/json' },
@@ -1463,7 +1473,7 @@ async function callModel(id,prompt,onTok,signal){
     m=NMAP[id]||'nvidia/llama-3.1-nemotron-70b-instruct';
   }else if(r==='gemini' || (!key(id) && (key('gemini') || (S.vaultAvailable && S.vaultAvailable.includes('gemini')) || hasServerApi))){
     via='gemini';
-    m=GMAP[id]||'gemini-3.1-flash-lite';
+    m=GMAP[id]||'gemini-3.5-flash-lite';
   }
   const k=key(via);
   const hasVaultKey = S.vaultAvailable && (S.vaultAvailable.includes(via) || S.vaultAvailable.includes('gemini'));
@@ -1475,7 +1485,7 @@ async function callModel(id,prompt,onTok,signal){
     if(via==='anthropic'){
       const antMsgs = Array.isArray(prompt) ? prompt.map(msg=>({role:msg.role,content:msg.content})) : [{role:'user',content:prompt}];
       if(hasVaultKey || !k){
-        res = await fetch('/api/proxy/stream', {
+        res = await fetch(getApiEndpoint('/api/proxy/stream'), {
           method: 'POST',
           signal,
           headers: { 'content-type': 'application/json' },
@@ -1523,7 +1533,7 @@ async function callModel(id,prompt,onTok,signal){
 
       const doGeminiFetch = async (targetModel) => {
         if (hasServerApi && (hasVaultKey || !k)) {
-          const sRes = await fetch('/api/proxy/stream', {
+          const sRes = await fetch(getApiEndpoint('/api/proxy/stream'), {
             method: 'POST',
             signal: internalAbort.signal,
             headers: { 'content-type': 'application/json' },
@@ -1538,7 +1548,7 @@ async function callModel(id,prompt,onTok,signal){
           body: JSON.stringify(gemBody)
         });
       };
-      const candidates = ['gemini-3.1-flash-lite', 'gemini-3.1-flash-lite-preview', 'gemini-3-flash-preview', 'gemma-4-26b-a4b-it'];
+      const candidates = ['gemini-3.5-flash-lite', 'gemini-3-flash-preview', 'gemma-4-26b-a4b-it'];
       const tried = new Set();
       try {
         for (const curM of candidates) {
@@ -1597,7 +1607,7 @@ async function callModel(id,prompt,onTok,signal){
       try {
         if(hasVaultKey || !k){
           // Securely call server proxy using Server Vault key
-          res = await fetch('/api/proxy/stream', {
+          res = await fetch(getApiEndpoint('/api/proxy/stream'), {
             method: 'POST',
             signal: internalAbort.signal,
             headers: { 'content-type': 'application/json' },
@@ -2338,9 +2348,8 @@ function saveKeys(){}
 
 /* ---------- Server Vault Check ---------- */
 async function checkServerVault() {
-  if (!/^https?:$/.test(location.protocol) || location.hostname.endsWith('github.io')) return;
   try {
-    const res = await fetch('./api/vault/status');
+    const res = await fetch(getApiEndpoint('/api/vault/status'));
     const ct = res.headers.get('content-type') || '';
     if (!res.ok || !ct.includes('application/json')) return;
     const json = await res.json();

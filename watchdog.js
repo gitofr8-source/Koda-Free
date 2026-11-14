@@ -42,8 +42,19 @@ function startTunnel() {
 
   log('Starting Cloudflare public tunnel...');
   tunnelProcess = spawn(cfExe, ['tunnel', '--url', 'http://localhost:3000'], {
-    cwd: DIR,
-    stdio: 'ignore'
+    cwd: DIR
+  });
+
+  tunnelProcess.stderr.on('data', (data) => {
+    const text = data.toString();
+    const match = text.match(/https:\/\/[a-z0-9-]+\.trycloudflare\.com/i);
+    if (match) {
+      const publicUrl = match[0];
+      log(`PUBLIC TUNNEL LIVE: ${publicUrl}`);
+      try {
+        fs.writeFileSync(path.join(DIR, 'data', 'public-tunnel-url.txt'), publicUrl, 'utf8');
+      } catch (_) {}
+    }
   });
 
   tunnelProcess.on('exit', (code, sig) => {
